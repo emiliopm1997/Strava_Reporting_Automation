@@ -13,9 +13,10 @@ dependencies:
   - pandas=1.4
   - pip=21.2
   - python=3.8
+  - python-dotenv=1.0
   - scikit-learn=1.0
   - scipy=1.7
   - statsmodels=0.13
   - sqlalchemy=2.0
   - pip:
-    - stravaio
+      - stravalib=1.2

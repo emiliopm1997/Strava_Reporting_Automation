@@ -130,3 +130,4 @@ dmypy.json
 
 # Emilio's Files
 scribbles.ipynb
+.env
