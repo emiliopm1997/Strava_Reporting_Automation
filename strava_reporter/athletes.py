@@ -99,7 +99,7 @@ class Athletes:
             athlete.activities.append(activity)
 
     def summary(self) -> pd.DataFrame:
-        """Count the number of activities per athlete.
+        """Display the number of activities per athlete.
 
         Returns
         -------
