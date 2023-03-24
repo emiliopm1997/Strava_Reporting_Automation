@@ -82,7 +82,8 @@ class Athletes:
             If the athlete is not registered.
         """
         if attr not in self.athlete_names:
-            raise AttributeError("Athlete '{}' was not found.".format(attr))
+            print("Athlete '{}' was not found.".format(attr))
+            return None
         return getattr(self, attr)
 
     def fill_activities(self, activities: "Activities"):
@@ -96,7 +97,10 @@ class Athletes:
         """
         for activity in activities:
             athlete = self.get_athlete(activity.athlete)
-            athlete.activities.append(activity)
+
+            # To only assign activities of active athletes.
+            if athlete:
+                athlete.activities.append(activity)
 
     def summary(self) -> pd.DataFrame:
         """Display the number of activities per athlete.

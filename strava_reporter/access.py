@@ -3,6 +3,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from stravalib.client import Client
+from stravalib.exc import AccessUnauthorized
 
 SCOPE = ["read_all", "profile:read_all", "activity:read_all"]
 CLUB_ID = 1099692
@@ -15,14 +16,18 @@ class StravaObjects:
         self._load_environment_variables()
         self._read_environment_variables()
 
-        # TODO: Check if account is valid
-        if self.__access_token:
+        try:
+            if not self.__access_token:
+                raise ValueError
             self.client = Client(self.__access_token)
-        else:
+            self.club = self.client.get_club(CLUB_ID)
+            print("Access granted with Access Token.")
+        except (AccessUnauthorized, ValueError):
             self.client = Client()
+            print("Access required through Code.")
             self._request_token()
-
-        self.club = self.client.get_club(CLUB_ID)
+            self.club = self.client.get_club(CLUB_ID)
+            print("Access granted with Code.")
 
     def _load_environment_variables(self):
         load_dotenv(Path(".").parent / ".env")
