@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List
 
 import pandas as pd
-from activities import Activities
+from .activities import Activities
 
 ATHLETES_JSON = Path(".").parent / "config" / "athletes.json"
 

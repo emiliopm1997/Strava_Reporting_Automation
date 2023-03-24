@@ -1,6 +1,7 @@
-from access import StravaObjects
-from activities import Activities
-from athletes import Athletes
+import argparse
+from strava_reporter.access import StravaObjects
+from strava_reporter.activities import Activities
+from strava_reporter.athletes import Athletes
 
 
 def main(num_activities: int):
@@ -23,4 +24,13 @@ def main(num_activities: int):
 
 
 if __name__ == "__main__":
-    main(15)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--n_records",
+        help="The number of records to be retreived.",
+        required=True,
+        type=int,
+        dest="n_records",
+    )
+    args = parser.parse_args()
+    main(args.n_records)
