@@ -55,6 +55,7 @@ class Athletes:
     athlete_names: List[str] = []
 
     def __init__(self):
+        """Set instance attributes."""
         with open(ATHLETES_JSON, "r") as f:
             athletes_raw = json.load(f)
 

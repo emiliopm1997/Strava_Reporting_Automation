@@ -1,11 +1,18 @@
 import pandas as pd
 from stravalib.model import Club
 
+from .config import Config
+
 
 class Activities(list):
     """Generalized object for activities."""
 
-    def fill_all_activities(self, club: "Club", total_act: int):
+    def __init__(self):
+        """Set instance attributes."""
+        super().__init__()
+        self.__config = Config()
+
+    def fill_club_activities(self, club: "Club"):
         """
         Retrieve the activities from a club.
 
@@ -13,19 +20,25 @@ class Activities(list):
         ----------
         club : :obj:`Club`
             The club object from where the activities are registered.
-        total_act : int
-            The number of activities to be retreived.
         """
         self.clear()
-        counter = 0
-        # result_fetcher only limits to 30 results
+        saved_activities = 0
+        total_activities = sum(1 for _ in club.activities)
+        activities_to_process = (
+            total_activities - self.__config.analyzed_activities
+        )
+
+        # Note: result_fetcher only limits to 30 results
         for activity_raw in club.activities:
             activity = Activity(**activity_raw.to_dict())
             self.append(activity)
-            counter += 1
+            saved_activities += 1
 
-            if counter == total_act:
+            if saved_activities == activities_to_process:
                 break
+
+        self.__config.analyzed_activities = total_activities
+        self.__config.save()
 
 
 class Activity:

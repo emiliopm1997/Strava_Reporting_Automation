@@ -1,5 +1,5 @@
 import argparse
-from strava_reporter.access import StravaObjects
+from strava_reporter.config import StravaObjects
 from strava_reporter.activities import Activities
 from strava_reporter.athletes import Athletes
 
@@ -16,7 +16,7 @@ def main(num_activities: int):
     strava_obj = StravaObjects()
 
     all_activities = Activities()
-    all_activities.fill_all_activities(strava_obj.club, num_activities)
+    all_activities.fill_club_activities(strava_obj.club)
 
     athletes = Athletes()
     athletes.fill_activities(all_activities)
