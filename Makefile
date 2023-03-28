@@ -9,4 +9,4 @@ rebuild_package:
 
 run:
 	pip install .
-	python -m strava_reporter --n_records 36
+	python -m strava_reporter

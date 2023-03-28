@@ -3,7 +3,9 @@ from pathlib import Path
 from typing import List
 
 import pandas as pd
+
 from .activities import Activities
+from .analysis import WeeklyAnalysis
 
 ATHLETES_JSON = Path(".").parent / "config" / "athletes.json"
 
@@ -19,7 +21,9 @@ class Athlete:
     strava_name: str
         The athlete's name as it is outputed in Strava.
     activities: :obj:`Activities`
-        The activities that the athlete has completed
+        The activities that the athlete has completed.
+    total_time: :obj:`pd.Timedelta`
+        Total activity time that the athlete has completed.
     """
 
     def __init__(self, name: str, strava_name: str):
@@ -29,17 +33,15 @@ class Athlete:
         self.activities = Activities()
 
     @property
-    def activity_count(self):
-        return len(self.activities)
+    def total_time(self):
+        total_time = pd.Timedelta(minutes=0)
+        for activity in self.activities:
+            total_time += activity.time
+        return total_time
 
     def __repr__(self) -> str:
         """Representation of the object."""
         return "{} ({})".format(self.name, self.activity_count)
-
-    # TODO: Validate activities (maybe in Activities)
-    # 1) The sum of the activity time in a day is greater than 30 min
-    # 2) The activity must have a picture or evidence of come sort (this
-    # is probably not going to happen)
 
 
 class Athletes:
@@ -50,9 +52,12 @@ class Athletes:
     ----------
     athlete_names : List[str]
         The registered athletes in the challenge.
+    athlete_strava_names : List[str]
+        The registered athletes in the challenge as they appear in Strava.
     """
 
     athlete_names: List[str] = []
+    athlete_strava_names: List[str] = []
 
     def __init__(self):
         """Set instance attributes."""
@@ -61,7 +66,8 @@ class Athletes:
 
         for athlete in athletes_raw:
             setattr(self, athlete["strava_name"], Athlete(**athlete))
-            self.athlete_names.append(athlete["strava_name"])
+            self.athlete_names.append(athlete["name"])
+            self.athlete_strava_names.append(athlete["strava_name"])
 
     def get_athlete(self, attr: str) -> "Athlete":
         """
@@ -74,20 +80,15 @@ class Athletes:
 
         Returns
         -------
-        :obj:`Activities`
+        :obj:`Athlete`
             The athlete in question.
-
-        Raises
-        ------
-        AttributeError
-            If the athlete is not registered.
         """
-        if attr not in self.athlete_names:
+        if attr not in self.athlete_strava_names:
             print("Athlete '{}' was not found.".format(attr))
             return None
         return getattr(self, attr)
 
-    def fill_activities(self, activities: "Activities"):
+    def asign_activities(self, activities: "Activities"):
         """
         Asign the activities to its corresponding athlete.
 
@@ -103,21 +104,20 @@ class Athletes:
             if athlete:
                 athlete.activities.append(activity)
 
-    def summary(self) -> pd.DataFrame:
-        """Display the number of activities per athlete.
+    def analyze(self):
+        """Analyze the daily activities and save the data on a csv."""
+        # Added 3 min tolerance.
+        minimum_time = pd.Timedelta(minutes=27)
 
-        Returns
-        -------
-        :obj:`pd.DataFrame`
-            A table with the count of every athlete's activities.
-        """
-        cols = ["athlete", "activities"]
-        summary_df = pd.DataFrame(columns=cols)
-        for athlete_name in self.athlete_names:
+        analysis = WeeklyAnalysis(self.athlete_names)
+
+        # Update table based on the athletes activity.
+        for athlete_name in self.athlete_strava_names:
             athlete = self.get_athlete(athlete_name)
-            row = pd.DataFrame(
-                [[athlete.name, athlete.activity_count]], columns=cols
-            )
-            summary_df = pd.concat([summary_df, row], ignore_index=True)
 
-        return summary_df
+            # Validate that the total activity is greater than the min time.
+            if athlete.total_time >= minimum_time:
+                analysis.count_athlete_activity(athlete=athlete.name)
+
+        analysis.update_total_counts()
+        analysis.save()
