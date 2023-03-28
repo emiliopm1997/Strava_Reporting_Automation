@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
@@ -16,27 +16,32 @@ class WeeklyAnalysis:
 
     Attributes
     ----------
-    col_today : str
-        The name of the column corresponding to today.
+    col_date : str
+        The name of the column corresponding to the reference date.
     data : :obj:`pd.DataFrame`
         The weekly activity counts per athlete as a table.
+    date : :obj:`pd.Timestamp`
+        The reference date and time.
     file_path : :obj:`Path`
         The name of the file where the analysis is located. This is based on
         the week's start date and end date.
     last_monday : :obj:`pd.Timestamp`
         The date of the beginning of the week.
-    today : :obj:`pd.Timestamp`
-        The current date and time.
     """
 
-    def __init__(self, athletes: List[str]):
+    def __init__(self, athletes: List[str], date: Optional[str] = "today"):
         """Set instance attributes."""
-        self.today = pd.Timestamp.now(tz="America/Mexico_City")
-        self.last_monday = self.today - pd.Timedelta(
-            days=self.today.day_of_week
+
+        self.date = (
+            pd.Timestamp.now(tz="America/Mexico_City") 
+            if date == "today"
+            else pd.Timestamp(date, tz="America/Mexico_City")
+            )
+        self.last_monday = self.date - pd.Timedelta(
+            days=self.date.day_of_week
         )
         self.file_path = REPORT_FOLDER / self._get_file_name()
-        self.col_today = self._get_column_name(self.today)
+        self.col_date = self._get_column_name(self.date)
 
         if self.file_path.exists():
             self.data = pd.read_csv(self.file_path)
@@ -88,7 +93,7 @@ class WeeklyAnalysis:
             The name of the athlete that completed the daily activity.
         """
 
-        self.data.loc[self.data["ATHLETE"] == athlete, self.col_today] = 1
+        self.data.loc[self.data["ATHLETE"] == athlete, self.col_date] = 1
 
     def update_total_counts(self):
         """Update the total counts of every athlete."""
