@@ -41,7 +41,7 @@ class Athlete:
 
     def __repr__(self) -> str:
         """Representation of the object."""
-        return "{} ({})".format(self.name, self.activity_count)
+        return "{} ({})".format(self.name, self.activities)
 
 
 class Athletes:

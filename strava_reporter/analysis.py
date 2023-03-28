@@ -103,7 +103,9 @@ class WeeklyAnalysis:
             if col not in ["ATHLETE", "TOTAL_DAYS"]
         ]
 
-        self.data["TOTAL_DAYS"] = self.data[cols_to_sum].sum(axis=1)
+        self.data["TOTAL_DAYS"] = (
+            self.data[cols_to_sum].sum(axis=1).astype("int64")
+        )
 
     def save(self):
         """Save file to csv."""

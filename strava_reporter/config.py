@@ -9,23 +9,26 @@ from stravalib.client import Client
 from stravalib.exc import AccessUnauthorized
 
 CONFIG_JSON = Path(".").parent / "config" / "config.json"
-CONFIG_JSON_TEST = Path(".").parent / "config" / "config2.json"
+CONFIG_JSON_OLD = Path(".").parent / "config" / "old_config.json"
 
 
 class Config:
     def __init__(self):
         """Set instance attributes."""
         with open(CONFIG_JSON, "r") as f:
-            config = json.load(f)
+            self.__config = json.load(f)
 
-        for k, v in config.items():
+        for k, v in self.__config.items():
             setattr(self, k, v)
 
     def save(self):
         """Save the updated config."""
         self.last_updated = str(pd.Timestamp.now(tz="America/Mexico_City"))[:10]
 
-        with open(CONFIG_JSON_TEST, "w") as outfile:
+        with open(CONFIG_JSON_OLD, "w") as outfile:
+            json.dump(self.__config, outfile)
+
+        with open(CONFIG_JSON, "w") as outfile:
             json.dump(self.__dict__, outfile)
 
 

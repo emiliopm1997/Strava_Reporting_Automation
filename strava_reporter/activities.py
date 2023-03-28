@@ -117,8 +117,7 @@ class Activity:
         self.name = kwargs["name"]
         self.distance = kwargs["distance"]
         self.sport_type = kwargs["type"]
-        # In minutes
-        self.time = pd.Timedelta(seconds=kwargs["elapsed_time"] / 60)
+        self.time = pd.Timedelta(seconds=kwargs["elapsed_time"])
 
     def __repr__(self) -> str:
         """Representation of the object."""
