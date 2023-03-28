@@ -128,6 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Reports
+reports/
+
 # Emilio's Files
 scribbles.ipynb
-.env

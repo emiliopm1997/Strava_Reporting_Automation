@@ -1,36 +1,49 @@
-import argparse
-from strava_reporter.access import StravaObjects
+import time
+
+import pandas as pd
+
 from strava_reporter.activities import Activities
 from strava_reporter.athletes import Athletes
+from strava_reporter.config import StravaObjects
 
 
-def main(num_activities: int):
-    """
-    The main pipeline of the package.
+def main():
+    """The main pipeline of the package."""
+    wait()
 
-    Parameters
-    ----------
-    num_activities : int
-        The number of activities to be retreived.
-    """
     strava_obj = StravaObjects()
 
     all_activities = Activities()
-    all_activities.fill_all_activities(strava_obj.club, num_activities)
+    all_activities.fill_club_activities(strava_obj.club)
 
     athletes = Athletes()
-    athletes.fill_activities(all_activities)
-    print(athletes.summary())
+    athletes.asign_activities(all_activities)
+    athletes.analyze()
+
+
+def wait():
+    """Wait until it is close to midnight."""
+    now = pd.Timestamp.now(tz="America/Mexico_City")
+
+    # Calculate threshold.
+    date = str(now)[:10]
+    t = "23:50:00.0"
+    dt = "{} {}".format(date, t)
+    threshold_time = pd.Timestamp(dt, tz="America/Mexico_City")
+
+    remaining_time = threshold_time - now
+
+    # Wait until we are close to midnight.
+    if remaining_time > pd.Timedelta(minutes=0):
+        sleep_time = remaining_time.seconds + 5
+        time.sleep(sleep_time)
+
+    print(
+        "Processing starting at {}.".format(
+            str(pd.Timestamp.now(tz="America/Mexico_City"))[:16]
+        )
+    )
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--n_records",
-        help="The number of records to be retreived.",
-        required=True,
-        type=int,
-        dest="n_records",
-    )
-    args = parser.parse_args()
-    main(args.n_records)
+    main()

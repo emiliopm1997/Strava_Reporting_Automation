@@ -1,0 +1,13 @@
+{
+    "club_id": 1099692,
+    "scope": [
+        "read_all",
+        "profile:read_all",
+        "activity:read_all"
+    ],
+    "last_three_activities": [
+        "d023900574580a6376b417404b0ce209",
+        "6fd045952e6e3a5500303e7b8d0ee590",
+        "97b9bc9db8d56d1b6c6f85af4cf4f6a9"
+    ]
+}

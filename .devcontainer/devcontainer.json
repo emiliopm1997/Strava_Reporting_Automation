@@ -31,7 +31,8 @@
 				"aaron-bond.better-comments",
 				"humao.rest-client",
 				"ms-vscode.makefile-tools",
-				"tal7aouy.icons"
+				"tal7aouy.icons",
+				"GrapeCity.gc-excelviewer"
 			]
 		}
 	},

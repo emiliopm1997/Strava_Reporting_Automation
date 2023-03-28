@@ -1,33 +1,83 @@
+import json
 import os
 from pathlib import Path
+from typing import Set
 
+import pandas as pd
 from dotenv import load_dotenv
 from stravalib.client import Client
 from stravalib.exc import AccessUnauthorized
 
-SCOPE = ["read_all", "profile:read_all", "activity:read_all"]
-CLUB_ID = 1099692
+CONFIG_JSON = Path(".").parent / "config" / "config.json"
+CONFIG_JSON_TEST = Path(".").parent / "config" / "config2.json"
+
+
+class Config:
+    def __init__(self):
+        """Set instance attributes."""
+        with open(CONFIG_JSON, "r") as f:
+            config = json.load(f)
+
+        for k, v in config.items():
+            setattr(self, k, v)
+
+    def save(self):
+        """Save the updated config."""
+        self.last_updated = str(pd.Timestamp.now(tz="America/Mexico_City"))[:10]
+
+        with open(CONFIG_JSON_TEST, "w") as outfile:
+            json.dump(self.__dict__, outfile)
 
 
 class StravaObjects:
     """Access Strava with account and retrieve the club object."""
 
     def __init__(self):
+        """Set instance attributes."""
         self._load_environment_variables()
         self._read_environment_variables()
+        self.__config = Config()
 
         try:
             if not self.__access_token:
                 raise ValueError
             self.client = Client(self.__access_token)
-            self.club = self.client.get_club(CLUB_ID)
+            self.club = self.client.get_club(self.__config.club_id)
             print("Access granted with Access Token.")
         except (AccessUnauthorized, ValueError):
             self.client = Client()
             print("Access required through Code.")
             self._request_token()
-            self.club = self.client.get_club(CLUB_ID)
+            self.club = self.client.get_club(self.__config.club_id)
             print("Access granted with Code.")
+
+    def get_athletes_in_club(self) -> Set[str]:
+        """
+        Retrieve the athletes that are members of the club.
+
+        Returns
+        -------
+        Set[str]
+            The athletes names.
+        """
+        counter = 0
+        threshold = 250
+
+        members = set()
+
+        # Iterate over activities and extract club members.
+        for activity in self.club.activities:
+            counter += 1
+            act_dict = activity.to_dict()
+            name = "{} {}".format(
+                act_dict["athlete"]["firstname"],
+                act_dict["athlete"]["lastname"],
+            )
+            members.add(name)
+            if counter == threshold:
+                break
+
+        return members
 
     def _load_environment_variables(self):
         load_dotenv(Path(".").parent / ".env")
@@ -41,7 +91,7 @@ class StravaObjects:
         authorize_url = self.client.authorization_url(
             client_id=self.__client_id,
             redirect_uri="http://127.0.0.1:5000/authorization",
-            scope=SCOPE,
+            scope=self.__config.scope,
         )
         print(authorize_url)
         code = input("Insert code: ")

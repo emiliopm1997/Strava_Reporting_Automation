@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-VERSION = "0.0.1"
+VERSION = "1.0.0"
 DESCRIPTION = "Extract a weekly report of the athletes within the club."
 LONG_DESCRIPTION = (
     "Extract a weekly report of the athletes that are members of the club, "
