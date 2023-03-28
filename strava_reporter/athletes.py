@@ -107,7 +107,7 @@ class Athletes:
     def analyze(self, date: Optional[str] = "today"):
         """
         Analyze the daily activities and save the data on a csv.
-        
+
         Parameters
         ----------
         date : str

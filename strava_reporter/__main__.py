@@ -19,7 +19,7 @@ def main(date: str, n_skip: int):
     n_skip: int
         Number of activities to skip.
     """
-    
+
     if date == "today":
         wait()
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         type=str,
         default="today",
         dest="date",
-        help="The date for the analysis as yyyy-mm-dd or 'today' (default)."
+        help="The date for the analysis as yyyy-mm-dd or 'today' (default).",
     )
     parser.add_argument(
         "--n_skip",
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         type=int,
         default=0,
         dest="n_skip",
-        help="The number of activities to skip."
+        help="The number of activities to skip.",
     )
     args = parser.parse_args()
     main(args.date, args.n_skip)

@@ -33,13 +33,11 @@ class WeeklyAnalysis:
         """Set instance attributes."""
 
         self.date = (
-            pd.Timestamp.now(tz="America/Mexico_City") 
+            pd.Timestamp.now(tz="America/Mexico_City")
             if date == "today"
             else pd.Timestamp(date, tz="America/Mexico_City")
-            )
-        self.last_monday = self.date - pd.Timedelta(
-            days=self.date.day_of_week
         )
+        self.last_monday = self.date - pd.Timedelta(days=self.date.day_of_week)
         self.file_path = REPORT_FOLDER / self._get_file_name()
         self.col_date = self._get_column_name(self.date)
 
