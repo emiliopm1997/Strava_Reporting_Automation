@@ -19,4 +19,4 @@ dependencies:
   - statsmodels=0.13
   - sqlalchemy=2.0
   - pip:
-      - stravalib=1.2
+      - stravalib

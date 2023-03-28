@@ -14,7 +14,7 @@ RUN conda env create --file environment.yml && \
 ENV PATH /opt/conda/envs/${CONDA_ENVIRONMENT}/bin:$PATH
 
 # For Makefiles
-RUN apt-get install -y make
+RUN apt-get update && apt-get install -y make
 
 # Install main package
 RUN rm -rf /src/*
