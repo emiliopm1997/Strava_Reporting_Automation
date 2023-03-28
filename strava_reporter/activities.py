@@ -1,6 +1,6 @@
 import hashlib
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import pandas as pd
 from stravalib.model import Club
@@ -16,7 +16,7 @@ class Activities(list):
         super().__init__()
         self.__config = Config()
 
-    def fill_club_activities(self, club: "Club"):
+    def fill_club_activities(self, club: "Club", to_ignore: Optional[int] = 0):
         """
         Retrieve the activities from a club.
 
@@ -24,6 +24,9 @@ class Activities(list):
         ----------
         club : :obj:`Club`
             The club object from where the activities are registered.
+        to_ignore: Optional[int]
+            Number of activities to ignore, starting from the top. Mainly used
+            when analysis is delayed.
         """
         self.clear()
         processed_activities = 0
@@ -32,9 +35,16 @@ class Activities(list):
         last_activities_new = []
         candidates_to_stop = []
         hashed_activities = 3
+        ignored = 0
 
         # Note: result_fetcher only limits to 30 results
         for activity_raw in club.activities:
+
+            # Skip activities
+            if to_ignore > ignored:
+                ignored += 1
+                continue
+
             is_candidate = False
             activity_raw_dict = activity_raw.to_dict()
             activity_hash = self.dict_hash(activity_raw_dict)
@@ -107,8 +117,7 @@ class Activity:
         self.name = kwargs["name"]
         self.distance = kwargs["distance"]
         self.sport_type = kwargs["type"]
-        # In minutes
-        self.time = pd.Timedelta(seconds=kwargs["elapsed_time"] / 60)
+        self.time = pd.Timedelta(seconds=kwargs["elapsed_time"])
 
     def __repr__(self) -> str:
         """Representation of the object."""

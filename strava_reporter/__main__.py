@@ -1,3 +1,4 @@
+import argparse
 import time
 
 import pandas as pd
@@ -7,22 +8,34 @@ from strava_reporter.athletes import Athletes
 from strava_reporter.config import StravaObjects
 
 
-def main():
-    """The main pipeline of the package."""
-    wait()
+def main(date: str, n_skip: int):
+    """
+    The main pipeline of the package.
+
+    Parameters
+    ----------
+    date : str
+        The date of the analysis.
+    n_skip: int
+        Number of activities to skip.
+    """
+
+    if date == "today":
+        wait()
 
     strava_obj = StravaObjects()
 
     all_activities = Activities()
-    all_activities.fill_club_activities(strava_obj.club)
+    all_activities.fill_club_activities(strava_obj.club, n_skip)
 
     athletes = Athletes()
     athletes.asign_activities(all_activities)
-    athletes.analyze()
+    athletes.analyze(date)
 
 
 def wait():
     """Wait until it is close to midnight."""
+    # TODO: generate more checks
     now = pd.Timestamp.now(tz="America/Mexico_City")
 
     # Calculate threshold.
@@ -46,4 +59,22 @@ def wait():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--date",
+        required=False,
+        type=str,
+        default="today",
+        dest="date",
+        help="The date for the analysis as yyyy-mm-dd or 'today' (default).",
+    )
+    parser.add_argument(
+        "--n_skip",
+        required=False,
+        type=int,
+        default=0,
+        dest="n_skip",
+        help="The number of activities to skip.",
+    )
+    args = parser.parse_args()
+    main(args.date, args.n_skip)

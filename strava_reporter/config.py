@@ -1,5 +1,6 @@
 import json
 import os
+from copy import deepcopy
 from pathlib import Path
 from typing import Set
 
@@ -9,24 +10,29 @@ from stravalib.client import Client
 from stravalib.exc import AccessUnauthorized
 
 CONFIG_JSON = Path(".").parent / "config" / "config.json"
-CONFIG_JSON_TEST = Path(".").parent / "config" / "config2.json"
+CONFIG_JSON_OLD = Path(".").parent / "config" / "old_config.json"
 
 
 class Config:
     def __init__(self):
         """Set instance attributes."""
         with open(CONFIG_JSON, "r") as f:
-            config = json.load(f)
+            self.__conf_old = json.load(f)
 
-        for k, v in config.items():
+        for k, v in self.__conf_old.items():
             setattr(self, k, v)
 
     def save(self):
         """Save the updated config."""
         self.last_updated = str(pd.Timestamp.now(tz="America/Mexico_City"))[:10]
 
-        with open(CONFIG_JSON_TEST, "w") as outfile:
-            json.dump(self.__dict__, outfile)
+        with open(CONFIG_JSON_OLD, "w") as outfile:
+            json.dump(self.__conf_old, outfile)
+
+        config_new = deepcopy(self.__dict__)
+        config_new.pop("_Config__conf_old")
+        with open(CONFIG_JSON, "w") as outfile:
+            json.dump(config_new, outfile)
 
 
 class StravaObjects:

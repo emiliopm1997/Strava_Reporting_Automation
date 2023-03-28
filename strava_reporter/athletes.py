@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
@@ -41,7 +41,7 @@ class Athlete:
 
     def __repr__(self) -> str:
         """Representation of the object."""
-        return "{} ({})".format(self.name, self.activity_count)
+        return "{} ({})".format(self.name, self.activities)
 
 
 class Athletes:
@@ -104,12 +104,19 @@ class Athletes:
             if athlete:
                 athlete.activities.append(activity)
 
-    def analyze(self):
-        """Analyze the daily activities and save the data on a csv."""
+    def analyze(self, date: Optional[str] = "today"):
+        """
+        Analyze the daily activities and save the data on a csv.
+
+        Parameters
+        ----------
+        date : str
+            The date for the analysis as yyyy-mm-dd or 'today' (default).
+        """
         # Added 3 min tolerance.
         minimum_time = pd.Timedelta(minutes=27)
 
-        analysis = WeeklyAnalysis(self.athlete_names)
+        analysis = WeeklyAnalysis(self.athlete_names, date)
 
         # Update table based on the athletes activity.
         for athlete_name in self.athlete_strava_names:
