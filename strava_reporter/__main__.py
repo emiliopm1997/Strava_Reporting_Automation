@@ -1,18 +1,19 @@
 import argparse
 import time
+from typing import Optional
 
 import pandas as pd
-from typing import Optional
 
 from strava_reporter.activities import Activities
 from strava_reporter.athletes import Athletes
 from strava_reporter.config import StravaObjects
+from strava_reporter.log import LOGGER
 
 
 def main(
     date: Optional[str] = "today",
     n_skip: Optional[int] = 0,
-    test: Optional[bool] = False
+    test: Optional[bool] = False,
 ):
     """
     The main pipeline of the package.
@@ -30,14 +31,26 @@ def main(
     if date == "today" and not test:
         wait()
 
+    LOGGER.info(
+        "Processing starting at {}.".format(
+            str(pd.Timestamp.now(tz="America/Mexico_City"))[:16]
+        )
+    )
+
     strava_obj = StravaObjects()
 
     all_activities = Activities()
+    LOGGER.info("Retreiving activities...")
     all_activities.fill_club_activities(strava_obj.club, n_skip, test)
+    LOGGER.info("Activities received: {}".format(len(all_activities)))
 
     athletes = Athletes()
-    athletes.asign_activities(all_activities)
+    LOGGER.info("Assigning activities to athletes...")
+    athletes.assign_activities(all_activities)
+
+    LOGGER.info("Validating athlete's activities...")
     athletes.analyze(date, test)
+    LOGGER.info("Main process completed succesfully!\n")
 
 
 def wait():
@@ -57,12 +70,6 @@ def wait():
     if remaining_time > pd.Timedelta(minutes=0):
         sleep_time = remaining_time.seconds + 5
         time.sleep(sleep_time)
-
-    print(
-        "Processing starting at {}.".format(
-            str(pd.Timestamp.now(tz="America/Mexico_City"))[:16]
-        )
-    )
 
 
 if __name__ == "__main__":

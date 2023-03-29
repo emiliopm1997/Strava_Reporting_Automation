@@ -20,7 +20,7 @@ class Activities(list):
         self,
         club: "Club",
         to_ignore: Optional[int] = 0,
-        test: Optional[bool] = False
+        test: Optional[bool] = False,
     ):
         """
         Retrieve the activities from a club.
@@ -130,4 +130,4 @@ class Activity:
 
     def __repr__(self) -> str:
         """Representation of the object."""
-        return "{} ({})".format(self.name, self.athlete)
+        return "{} ({})".format(self.name, self.time)
