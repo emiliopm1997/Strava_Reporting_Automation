@@ -16,7 +16,12 @@ class Activities(list):
         super().__init__()
         self.__config = Config()
 
-    def fill_club_activities(self, club: "Club", to_ignore: Optional[int] = 0):
+    def fill_club_activities(
+        self,
+        club: "Club",
+        to_ignore: Optional[int] = 0,
+        test: Optional[bool] = False,
+    ):
         """
         Retrieve the activities from a club.
 
@@ -27,6 +32,8 @@ class Activities(list):
         to_ignore: Optional[int]
             Number of activities to ignore, starting from the top. Mainly used
             when analysis is delayed.
+        test : Optional[bool]
+            True for test runs, otherwise False.
         """
         self.clear()
         processed_activities = 0
@@ -75,7 +82,9 @@ class Activities(list):
             processed_activities += 1
 
         self.__config.last_three_activities = last_activities_new
-        self.__config.save()
+
+        if not test:
+            self.__config.save()
 
     def dict_hash(self, dictionary: Dict[str, Any]) -> str:
         """MD5 hash of a dictionary."""
@@ -121,4 +130,4 @@ class Activity:
 
     def __repr__(self) -> str:
         """Representation of the object."""
-        return "{} ({})".format(self.name, self.athlete)
+        return "{} ({})".format(self.name, self.time)

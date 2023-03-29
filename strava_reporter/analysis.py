@@ -3,6 +3,8 @@ from typing import List, Optional
 
 import pandas as pd
 
+from .log import LOGGER
+
 REPORT_FOLDER = Path(".").parent / "reports"
 
 
@@ -38,12 +40,19 @@ class WeeklyAnalysis:
             else pd.Timestamp(date, tz="America/Mexico_City")
         )
         self.last_monday = self.date - pd.Timedelta(days=self.date.day_of_week)
-        self.file_path = REPORT_FOLDER / self._get_file_name()
+        file_name = self._get_file_name()
+        self.file_path = REPORT_FOLDER / file_name
         self.col_date = self._get_column_name(self.date)
 
         if self.file_path.exists():
+            LOGGER.info("File '{}' exist. Reading file...".format(file_name))
             self.data = pd.read_csv(self.file_path)
         else:
+            LOGGER.info(
+                "File '{}' doesn't exist. Creating template...".format(
+                    file_name
+                )
+            )
             self.data = self._get_data_template(athletes)
 
     def _get_file_name(self) -> str:
@@ -95,6 +104,7 @@ class WeeklyAnalysis:
 
     def update_total_counts(self):
         """Update the total counts of every athlete."""
+        LOGGER.info("Updating total counts...")
         cols_to_sum = [
             col
             for col in self.data.columns
@@ -107,4 +117,5 @@ class WeeklyAnalysis:
 
     def save(self):
         """Save file to csv."""
+        LOGGER.info("Saving data file...")
         self.data.to_csv(self.file_path, index=False)

@@ -6,6 +6,7 @@ import pandas as pd
 
 from .activities import Activities
 from .analysis import WeeklyAnalysis
+from .log import LOGGER
 
 ATHLETES_JSON = Path(".").parent / "config" / "athletes.json"
 
@@ -84,11 +85,11 @@ class Athletes:
             The athlete in question.
         """
         if attr not in self.athlete_strava_names:
-            print("Athlete '{}' was not found.".format(attr))
+            LOGGER.info("Athlete '{}' was not found.".format(attr))
             return None
         return getattr(self, attr)
 
-    def asign_activities(self, activities: "Activities"):
+    def assign_activities(self, activities: "Activities"):
         """
         Asign the activities to its corresponding athlete.
 
@@ -104,7 +105,9 @@ class Athletes:
             if athlete:
                 athlete.activities.append(activity)
 
-    def analyze(self, date: Optional[str] = "today"):
+    def analyze(
+        self, date: Optional[str] = "today", test: Optional[bool] = False
+    ):
         """
         Analyze the daily activities and save the data on a csv.
 
@@ -112,6 +115,8 @@ class Athletes:
         ----------
         date : str
             The date for the analysis as yyyy-mm-dd or 'today' (default).
+        test : Optional[bool]
+            True for test runs, otherwise False.
         """
         # Added 3 min tolerance.
         minimum_time = pd.Timedelta(minutes=27)
@@ -125,6 +130,14 @@ class Athletes:
             # Validate that the total activity is greater than the min time.
             if athlete.total_time >= minimum_time:
                 analysis.count_athlete_activity(athlete=athlete.name)
+            elif athlete.total_time > pd.Timedelta(seconds=0):
+                LOGGER.info(
+                    "The activities of '{}' are not valid.".format(athlete)
+                )
 
         analysis.update_total_counts()
-        analysis.save()
+
+        if test:
+            print(analysis.data)
+        else:
+            analysis.save()

@@ -24,15 +24,16 @@
 			},
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
-				"ms-python.vscode-pylance",
 				"ms-python.python",
+				"ms-python.vscode-pylance",
 				"redhat.vscode-yaml",
 				"njpwerner.autodocstring",
 				"aaron-bond.better-comments",
 				"humao.rest-client",
 				"ms-vscode.makefile-tools",
 				"tal7aouy.icons",
-				"GrapeCity.gc-excelviewer"
+				"GrapeCity.gc-excelviewer",
+				"ms-python.flake8"
 			]
 		}
 	},

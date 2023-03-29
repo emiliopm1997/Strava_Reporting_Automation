@@ -22,7 +22,9 @@ RUN rm -rf /src/*
 # Copy all contents
 WORKDIR /home
 COPY . /home
-# RUN mkdir -p inputs logs outputs
+
+# Create directories
+RUN mkdir -p logs reports
 CMD [ "bash"]
 
 ###############################

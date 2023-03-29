@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 from stravalib.client import Client
 from stravalib.exc import AccessUnauthorized
 
+from .log import LOGGER
+
 CONFIG_JSON = Path(".").parent / "config" / "config.json"
 CONFIG_JSON_OLD = Path(".").parent / "config" / "old_config.json"
 
@@ -24,13 +26,15 @@ class Config:
 
     def save(self):
         """Save the updated config."""
-        self.last_updated = str(pd.Timestamp.now(tz="America/Mexico_City"))[:10]
+        self.last_updated = str(pd.Timestamp.now(tz="America/Mexico_City"))
 
+        LOGGER.info("Saving old config...")
         with open(CONFIG_JSON_OLD, "w") as outfile:
             json.dump(self.__conf_old, outfile)
 
         config_new = deepcopy(self.__dict__)
         config_new.pop("_Config__conf_old")
+        LOGGER.info("Saving new config...")
         with open(CONFIG_JSON, "w") as outfile:
             json.dump(config_new, outfile)
 
@@ -49,13 +53,13 @@ class StravaObjects:
                 raise ValueError
             self.client = Client(self.__access_token)
             self.club = self.client.get_club(self.__config.club_id)
-            print("Access granted with Access Token.")
+            LOGGER.info("Access granted with Access Token.")
         except (AccessUnauthorized, ValueError):
             self.client = Client()
             print("Access required through Code.")
             self._request_token()
             self.club = self.client.get_club(self.__config.club_id)
-            print("Access granted with Code.")
+            LOGGER.info("Access granted with Code.")
 
     def get_athletes_in_club(self) -> Set[str]:
         """

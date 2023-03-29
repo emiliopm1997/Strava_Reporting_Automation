@@ -128,8 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Reports
+# Personal files
 reports/
+logs/
 
 # Emilio's Files
 scribbles.ipynb
