@@ -1,0 +1,1 @@
+python -m strava_reporter --test true
