@@ -2,35 +2,42 @@ import argparse
 import time
 
 import pandas as pd
+from typing import Optional
 
 from strava_reporter.activities import Activities
 from strava_reporter.athletes import Athletes
 from strava_reporter.config import StravaObjects
 
 
-def main(date: str, n_skip: int):
+def main(
+    date: Optional[str] = "today",
+    n_skip: Optional[int] = 0,
+    test: Optional[bool] = False
+):
     """
     The main pipeline of the package.
 
     Parameters
     ----------
-    date : str
+    date : Optional[str]
         The date of the analysis.
-    n_skip: int
+    n_skip: Optional[int]
         Number of activities to skip.
+    test : Optional[bool]
+        True for test runs, otherwise False.
     """
 
-    if date == "today":
+    if date == "today" and not test:
         wait()
 
     strava_obj = StravaObjects()
 
     all_activities = Activities()
-    all_activities.fill_club_activities(strava_obj.club, n_skip)
+    all_activities.fill_club_activities(strava_obj.club, n_skip, test)
 
     athletes = Athletes()
     athletes.asign_activities(all_activities)
-    athletes.analyze(date)
+    athletes.analyze(date, test)
 
 
 def wait():
@@ -76,5 +83,15 @@ if __name__ == "__main__":
         dest="n_skip",
         help="The number of activities to skip.",
     )
+
+    # TODO: Replace by unittests.
+    parser.add_argument(
+        "--test",
+        required=False,
+        type=bool,
+        default=False,
+        dest="test",
+        help="Whether the code is being run as a test.",
+    )
     args = parser.parse_args()
-    main(args.date, args.n_skip)
+    main(args.date, args.n_skip, args.test)
