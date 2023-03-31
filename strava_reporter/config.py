@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from stravalib.client import Client
 from stravalib.exc import AccessUnauthorized
 
-from .log import LOGGER
+from .utils.log import LOGGER
 
 CONFIG_JSON = Path(".").parent / "config" / "config.json"
 CONFIG_JSON_OLD = Path(".").parent / "config" / "old_config.json"

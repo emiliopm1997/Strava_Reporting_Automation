@@ -6,7 +6,7 @@ import pandas as pd
 
 from .activities import Activities
 from .analysis import WeeklyAnalysis
-from .log import LOGGER
+from .utils.log import LOGGER
 
 ATHLETES_JSON = Path(".").parent / "config" / "athletes.json"
 
