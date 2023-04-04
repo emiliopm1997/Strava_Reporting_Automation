@@ -76,7 +76,8 @@ class WeeklyAnalysis:
 
     def _get_column_name(self, day: pd.Timestamp) -> str:
         day_name = day.day_name().upper()[:3]
-        col_name = "{}_{}".format(day_name, self._custom_date_to_str(day)[:4])
+        col_name = "{}_{}".format(
+            day_name, timestamp_to_compressed_str(day)[:4])
         return col_name
 
     def count_athlete_activity(self, athlete: str):

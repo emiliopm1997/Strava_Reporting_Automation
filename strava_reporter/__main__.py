@@ -54,7 +54,7 @@ def main(
         LOGGER.info("Zappier and API activities match.")
     else:
         LOGGER.warning("Zappier and API activities do NOT match. {}/{}".format(
-            zappier_data.n_activities == len(all_activities)
+            zappier_data.n_activities, len(all_activities)
         ))
 
     athletes = Athletes()

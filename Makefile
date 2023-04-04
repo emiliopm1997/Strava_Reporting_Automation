@@ -9,4 +9,4 @@ rebuild_package:
 
 run:
 	pip install .
-	python -m strava_reporter
+	python -m strava_reporter --test true
