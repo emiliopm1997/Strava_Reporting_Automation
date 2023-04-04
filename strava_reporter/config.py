@@ -1,3 +1,4 @@
+import gspread
 import json
 import os
 from copy import deepcopy
@@ -10,9 +11,11 @@ from stravalib.client import Client
 from stravalib.exc import AccessUnauthorized
 
 from .utils.log import LOGGER
+from .utils.time import timestamp_to_unix
 
 CONFIG_JSON = Path(".").parent / "config" / "config.json"
 CONFIG_JSON_OLD = Path(".").parent / "config" / "old_config.json"
+GOOGLE_CONFIG = Path(".").parent / "config" / "google_spreadsheet_access.json"
 
 
 class Config:
@@ -114,3 +117,19 @@ class StravaObjects:
         self.client.access_token = token_response["access_token"]
         self.client.refresh_token = token_response["refresh_token"]
         self.client.expires_at = token_response["expires_at"]
+
+
+class ZappierData:
+
+    def __init__(self, ts: pd.Timestamp):
+        """Set instance attributes."""
+        service_account = gspread.service_account(GOOGLE_CONFIG)
+        ssheet = service_account.open("Stravadictos Activities")
+        wsheet = ssheet.worksheet("Sheet1")
+
+        start = timestamp_to_unix(ts)
+        end = timestamp_to_unix(ts + pd.Timedelta(days=1))
+
+        df_all = pd.DataFrame(wsheet.get_all_records())
+        df = df_all[df_all["UNIX_UPLOAD_TIME"].between(start, end)]
+        self.n_activities = df.shape[1]

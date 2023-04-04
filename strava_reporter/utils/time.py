@@ -58,3 +58,26 @@ def timestamp_to_compressed_str(ts: pd.Timestamp) -> str:
     mod_date_str = "".join(date_lst)
 
     return mod_date_str
+
+
+def str_to_timestamp(date: str) -> pd.Timestamp:
+    """
+    Convert str to a timestamp.
+
+    Parameters
+    ----------
+    date : str
+        A date in the form of a str or 'today'.
+
+    Returns
+    -------
+    ts : :obj:`pd.Timestamp`
+        The timestamp that corresponds to a date.
+    """
+    today = str(pd.Timestamp.now(tz="America/Mexico_City"))[:10]
+    ts = (
+        pd.Timestamp(today, tz="America/Mexico_City")
+        if date == "today"
+        else pd.Timestamp(date, tz="America/Mexico_City")
+    )
+    return ts

@@ -32,14 +32,10 @@ class WeeklyAnalysis:
         The date of the beginning of the week.
     """
 
-    def __init__(self, athletes: List[str], date: Optional[str] = "today"):
+    def __init__(self, athletes: List[str], ts: pd.Timestamp):
         """Set instance attributes."""
 
-        self.date = (
-            pd.Timestamp.now(tz="America/Mexico_City")
-            if date == "today"
-            else pd.Timestamp(date, tz="America/Mexico_City")
-        )
+        self.date = ts
         self.last_monday = self.date - pd.Timedelta(days=self.date.day_of_week)
         file_name = self._get_file_name()
         self.file_path = REPORT_FOLDER / file_name
