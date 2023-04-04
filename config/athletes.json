@@ -4,24 +4,12 @@
         "strava_name": "Emilio P."
     },
     {
-        "name": "Agliberto Llamas",
-        "strava_name": "Agliberto L."
-    },
-    {
         "name": "Ana Barbara González",
         "strava_name": "Ana Barbara G."
     },
     {
         "name": "Ana Ceci Foulkes",
         "strava_name": "Ana Ceci F."
-    },
-    {
-        "name": "Andrea Austria",
-        "strava_name": "Andrea A."
-    },
-    {
-        "name": "Chava Calderón",
-        "strava_name": "Chava C."
     },
     {
         "name": "Daniel Llamas",
@@ -34,10 +22,6 @@
     {
         "name": "Gerardo Martínez",
         "strava_name": "Gerardo M."
-    },
-    {
-        "name": "JM Espinoza",
-        "strava_name": "JM E."
     },
     {
         "name": "Jose Ge Estrada",
@@ -54,5 +38,13 @@
     {
         "name": "Sebastián Gutierrez",
         "strava_name": "Sebastian G."
+    },
+    {
+        "name": "Amado Herrera",
+        "strava_name": "Amado H."
+    },
+    {
+        "name": "Marco González",
+        "strava_name": "Marco G."
     }
 ]
