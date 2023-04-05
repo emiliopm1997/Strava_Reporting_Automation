@@ -3,7 +3,8 @@ from typing import List, Optional
 
 import pandas as pd
 
-from .log import LOGGER
+from .utils.log import LOGGER
+from .utils.time import timestamp_to_compressed_str
 
 REPORT_FOLDER = Path(".").parent / "reports"
 
@@ -31,14 +32,10 @@ class WeeklyAnalysis:
         The date of the beginning of the week.
     """
 
-    def __init__(self, athletes: List[str], date: Optional[str] = "today"):
+    def __init__(self, athletes: List[str], ts: pd.Timestamp):
         """Set instance attributes."""
 
-        self.date = (
-            pd.Timestamp.now(tz="America/Mexico_City")
-            if date == "today"
-            else pd.Timestamp(date, tz="America/Mexico_City")
-        )
+        self.date = ts
         self.last_monday = self.date - pd.Timedelta(days=self.date.day_of_week)
         file_name = self._get_file_name()
         self.file_path = REPORT_FOLDER / file_name
@@ -59,18 +56,10 @@ class WeeklyAnalysis:
         next_sunday = self.last_monday + pd.Timedelta(days=6)
 
         data_name = "athlete_records_{}_{}.csv".format(
-            self._custom_date_to_str(self.last_monday),
-            self._custom_date_to_str(next_sunday),
+            timestamp_to_compressed_str(self.last_monday),
+            timestamp_to_compressed_str(next_sunday),
         )
         return data_name
-
-    def _custom_date_to_str(self, date: pd.Timestamp) -> str:
-        date_str = str(date)[:10]
-        # Remove "-" and flip list
-        date_lst = date_str.split("-")[::-1]
-        mod_date_str = "".join(date_lst)
-
-        return mod_date_str
 
     def _get_data_template(self, athletes: List[str]) -> pd.DataFrame:
         columns = []
@@ -87,13 +76,14 @@ class WeeklyAnalysis:
 
     def _get_column_name(self, day: pd.Timestamp) -> str:
         day_name = day.day_name().upper()[:3]
-        col_name = "{}_{}".format(day_name, self._custom_date_to_str(day)[:4])
+        col_name = "{}_{}".format(
+            day_name, timestamp_to_compressed_str(day)[:4]
+        )
         return col_name
 
     def count_athlete_activity(self, athlete: str):
         """
         Count the daily activities of a given athlete.
-
         Parameters
         ----------
         athlete : str
