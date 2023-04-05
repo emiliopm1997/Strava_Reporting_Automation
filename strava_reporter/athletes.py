@@ -105,9 +105,7 @@ class Athletes:
             if athlete:
                 athlete.activities.append(activity)
 
-    def analyze(
-        self, ts: pd.Timestamp, test: Optional[bool] = False
-    ):
+    def analyze(self, ts: pd.Timestamp, test: Optional[bool] = False):
         """
         Analyze the daily activities and save the data on a csv.
 

@@ -135,3 +135,4 @@ logs/
 # Emilio's Files
 scribbles.ipynb
 nohup.out
+config/google_spreadsheet_access.json

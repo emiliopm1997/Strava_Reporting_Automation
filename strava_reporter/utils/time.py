@@ -15,9 +15,11 @@ def unix_to_timestamp(ut: int) -> pd.Timestamp:
     :obj:`pd.Timestamp`
         The unix time transformed into a Mexico City timestamp.
     """
-    ts = pd.to_datetime(ut, unit='s') \
-        .tz_localize('UTC') \
+    ts = (
+        pd.to_datetime(ut, unit="s")
+        .tz_localize("UTC")
         .tz_convert(tz="America/Mexico_City")
+    )
     return ts
 
 
