@@ -6,7 +6,7 @@ import pandas as pd
 
 from .activities import Activities
 from .analysis import WeeklyAnalysis
-from .log import LOGGER
+from .utils.log import LOGGER
 
 ATHLETES_JSON = Path(".").parent / "config" / "athletes.json"
 
@@ -78,7 +78,6 @@ class Athletes:
         ----------
         attr : str
             The name of the athlete that wants to be retreived.
-
         Returns
         -------
         :obj:`Athlete`
@@ -105,23 +104,21 @@ class Athletes:
             if athlete:
                 athlete.activities.append(activity)
 
-    def analyze(
-        self, date: Optional[str] = "today", test: Optional[bool] = False
-    ):
+    def analyze(self, ts: pd.Timestamp, test: Optional[bool] = False):
         """
         Analyze the daily activities and save the data on a csv.
 
         Parameters
         ----------
-        date : str
-            The date for the analysis as yyyy-mm-dd or 'today' (default).
+        ts : :obj:`pd.DataFrame`
+            The timestamp for the anlysis.
         test : Optional[bool]
             True for test runs, otherwise False.
         """
         # Added 3 min tolerance.
         minimum_time = pd.Timedelta(minutes=27)
 
-        analysis = WeeklyAnalysis(self.athlete_names, date)
+        analysis = WeeklyAnalysis(self.athlete_names, ts)
 
         # Update table based on the athletes activity.
         for athlete_name in self.athlete_strava_names:
