@@ -2,7 +2,7 @@ import sqlite3
 from pathlib import Path
 from typing import Optional
 
-from .config import Config
+from strava_reporter.config import Config
 
 
 class DBHandler:
@@ -16,7 +16,7 @@ class DBHandler:
     def __init__(self):
         """Set instance attributes."""
         __config = Config()
-        db_path = Path(__config.paths["db"])
+        db_path = Path(".").parent / __config.paths["db"]
         self.conn = sqlite3.connect(db_path)
         self.cur = self.conn.cursor()
 
@@ -26,8 +26,26 @@ class DBHandler:
             strava_name: str,
             active: Optional[bool] = True
     ):
-        self.cur.execute("""
-            INSERT INTO ATHLETES VALUES
-                ({}, {}, {})
-        """.format(name, strava_name, active))
+        table = "ATHLETES"
+        values = f"('{name}', '{strava_name}', {active})"
+        self._insert(table, values)
+
+    def drop_athlete_by_strava_name(
+            self,
+            strava_name: str
+    ):
+        table = "ATHLETES"
+        condition = f"strava_name = '{strava_name}'"
+        self._delete(table, condition)
+
+    def _insert(self, table: str, values: str):
+        sql = f"INSERT INTO {table} VALUES {values}"
+        print(sql)
+        self.cur.execute(sql)
+        self.conn.commit()
+
+    def _delete(self, table: str, conditions: str):
+        sql = f"DELETE FROM {table} WHERE {conditions}"
+        print(sql)
+        self.cur.execute(sql)
         self.conn.commit()

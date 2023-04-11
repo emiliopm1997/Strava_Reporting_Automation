@@ -12,6 +12,6 @@
     ],
     "last_updated": "2023-03-28",
     "paths": {
-        "db": "../data/stravadictos.db"
+        "db": "data/stravadictos.db"
     }
 }
