@@ -1,0 +1,4 @@
+[flake8]
+
+docstring-convention=numpy
+ignore=D100, D104

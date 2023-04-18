@@ -35,6 +35,7 @@ class Athlete:
 
     @property
     def total_time(self):
+        """Sum entire time."""
         total_time = pd.Timedelta(minutes=0)
         for activity in self.activities:
             total_time += activity.time
@@ -78,6 +79,7 @@ class Athletes:
         ----------
         attr : str
             The name of the athlete that wants to be retreived.
+
         Returns
         -------
         :obj:`Athlete`

@@ -6,8 +6,8 @@ import pandas as pd
 
 from strava_reporter.activities import Activities
 from strava_reporter.athletes import Athletes
-from strava_reporter.handlers.strava import StravaObjects
 from strava_reporter.handlers.database import DBHandler
+from strava_reporter.handlers.strava import StravaObjects
 from strava_reporter.utils.log import LOGGER
 from strava_reporter.utils.time import str_to_timestamp
 
@@ -18,7 +18,8 @@ def main(
     test: Optional[bool] = False,
 ):
     """
-    The main pipeline of the package.
+    Run the main pipeline of the package.
+
     Parameters
     ----------
     date : Optional[str]
@@ -28,7 +29,6 @@ def main(
     test : Optional[bool]
         True for test runs, otherwise False.
     """
-
     if date == "today" and not test:
         wait()
 
