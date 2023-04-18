@@ -14,6 +14,7 @@ from strava_reporter.utils.time import str_to_timestamp
 
 def main(
     date: Optional[str] = "today",
+    stop_after: Optional[int] = None,
     n_skip: Optional[int] = 0,
     test: Optional[bool] = False,
 ):
@@ -24,6 +25,8 @@ def main(
     ----------
     date : Optional[str]
         The date of the analysis.
+    stop_after : Optional[str]
+        Number of activities to record.
     n_skip: Optional[int]
         Number of activities to skip.
     test : Optional[bool]
@@ -48,7 +51,14 @@ def main(
 
     all_activities = Activities()
     LOGGER.info("Retreiving activities...")
-    all_activities.fill_club_activities(strava_obj.club, ts, n_skip, test)
+    all_activities.fill_club_activities(
+        strava_obj.club,
+        ts,
+        last_hashes,
+        stop_after,
+        n_skip,
+        test
+    )
     LOGGER.info("Activities received: {}".format(len(all_activities)))
     all_activities.save_activities_to_db(db, week_number)
     LOGGER.info("Activities saved to db...")
@@ -92,6 +102,14 @@ if __name__ == "__main__":
         help="The date for the analysis as yyyy-mm-dd or 'today' (default).",
     )
     parser.add_argument(
+        "--stop_after",
+        required=False,
+        type=int,
+        default=None,
+        dest="stop_after",
+        help="The number of activities to record.",
+    )
+    parser.add_argument(
         "--n_skip",
         required=False,
         type=int,
@@ -110,4 +128,4 @@ if __name__ == "__main__":
         help="Whether the code is being run as a test.",
     )
     args = parser.parse_args()
-    main(args.date, args.n_skip, args.test)
+    main(args.date, args.stop_after, args.n_skip, args.test)

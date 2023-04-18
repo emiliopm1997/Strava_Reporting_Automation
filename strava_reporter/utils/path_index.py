@@ -4,7 +4,6 @@ CONFIG_PATH = Path(".").parent.parent / "config"
 DATA_PATH = Path(".").parent.parent / "data"
 
 CONFIG_JSON = CONFIG_PATH / "config.json"
-CONFIG_JSON_OLD = CONFIG_PATH / "old_config.json"
 GOOGLE_CONFIG = CONFIG_PATH / "google_spreadsheet_access.json"
 ENV_VARS = CONFIG_PATH / ".env"
 
