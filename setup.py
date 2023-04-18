@@ -4,8 +4,8 @@ VERSION = "1.0.1"
 DESCRIPTION = "Extract a weekly report of the athletes within the club."
 LONG_DESCRIPTION = (
     "Extract a weekly report of the athletes that are members of the club, "
-    + "and classify them between those who completed the weekly challenge and "
-    + "those who didn't."
+    "and classify them between those who completed the weekly challenge and "
+    "those who didn't."
 )
 
 # Setting up

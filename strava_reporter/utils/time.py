@@ -4,10 +4,12 @@ import pandas as pd
 def unix_to_timestamp(ut: int) -> pd.Timestamp:
     """
     Convert Unix time to Timestamp.
+
     Parameters
     ----------
     ut : int
         A unix time variable.
+
     Returns
     -------
     :obj:`pd.Timestamp`
@@ -24,13 +26,15 @@ def unix_to_timestamp(ut: int) -> pd.Timestamp:
 def timestamp_to_unix(ts: pd.Timestamp) -> int:
     """
     Convert Timestamp to Unix time.
+
     Parameters
     ----------
     ts : :obj:`pd.Timestamp`
         A local timestamp.
+
     Returns
     -------
-    ut : int
+    int
         A unix time variable.
     """
     return int(ts.timestamp())
@@ -39,13 +43,15 @@ def timestamp_to_unix(ts: pd.Timestamp) -> int:
 def timestamp_to_compressed_str(ts: pd.Timestamp) -> str:
     """
     Convert Timestamp to a compressed date string.
+
     Parameters
     ----------
     ts : :obj:`pd.Timestamp`
         A local timestamp.
+
     Returns
     -------
-    mod_date_str : str
+    str
         A string with the date as 'ddmmyyyy'.
     """
     date_str = str(ts)[:10]
@@ -59,13 +65,15 @@ def timestamp_to_compressed_str(ts: pd.Timestamp) -> str:
 def str_to_timestamp(date: str) -> pd.Timestamp:
     """
     Convert str to a timestamp.
+
     Parameters
     ----------
     date : str
         A date in the form of a str or 'today'.
+
     Returns
     -------
-    ts : :obj:`pd.Timestamp`
+    :obj:`pd.Timestamp`
         The timestamp that corresponds to a date.
     """
     today = str(pd.Timestamp.now(tz="America/Mexico_City"))[:10]

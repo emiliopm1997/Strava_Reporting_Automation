@@ -108,7 +108,6 @@ class Activities(list):
         db : :obj:`DBHandler`
             The data base handler used to save the activities.
         """
-
         for activity in self:
             db.add_activity(
                 activity.activity_id,

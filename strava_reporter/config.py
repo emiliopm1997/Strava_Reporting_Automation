@@ -4,8 +4,12 @@ from copy import deepcopy
 import pandas as pd
 
 from .utils.log import LOGGER
+from .utils.path_index import CONFIG_JSON, CONFIG_JSON_OLD
+
 
 class Config:
+    """Configuration variables."""
+
     def __init__(self):
         """Set instance attributes."""
         with open(CONFIG_JSON, "r") as f:

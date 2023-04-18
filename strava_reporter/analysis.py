@@ -34,7 +34,6 @@ class WeeklyAnalysis:
 
     def __init__(self, athletes: List[str], ts: pd.Timestamp):
         """Set instance attributes."""
-
         self.date = ts
         self.last_monday = self.date - pd.Timedelta(days=self.date.day_of_week)
         file_name = self._get_file_name()
@@ -84,12 +83,12 @@ class WeeklyAnalysis:
     def count_athlete_activity(self, athlete: str):
         """
         Count the daily activities of a given athlete.
+
         Parameters
         ----------
         athlete : str
             The name of the athlete that completed the daily activity.
         """
-
         self.data.loc[self.data["ATHLETE"] == athlete, self.col_date] = 1
 
     def update_total_counts(self):

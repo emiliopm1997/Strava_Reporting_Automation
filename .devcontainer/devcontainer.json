@@ -17,7 +17,6 @@
 				],
 				"python.defaultInterpreterPath": "/opt/conda/envs/py_env/bin/python",
 				"python.formatting.autopep8Path": "/opt/conda/envs/py_env/bin/autopep8",
-				"python.formatting.blackPath": "/opt/conda/envs/py_env/bin/black",
 				"python.linting.flake8Path": "/opt/conda/envs/py_env/bin/flake8",
 				"python.linting.flake8Enabled": true,
 				"python.sortImports.path": "/opt/conda/envs/py_env/bin/isort"

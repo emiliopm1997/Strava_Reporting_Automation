@@ -22,7 +22,7 @@ class ZapierHandler:
         ssheet = service_account.open("Stravadictos Activities")
         wsheet = ssheet.worksheet("Sheet1")
 
-        #! If no significant diff, this will be implemented in a new func.
+        # ! If no significant diff, this will be implemented in a new func.
         start = timestamp_to_unix(ts)
         end = timestamp_to_unix(ts + pd.Timedelta(days=1))
 

@@ -1,17 +1,18 @@
 import os
+from typing import Set
 
 from dotenv import load_dotenv
 from stravalib.client import Client
 from stravalib.exc import AccessUnauthorized
-from typing import Set
 
 from ..config import Config
-from ..utils.path_index import ENV_VARS
 from ..utils.log import LOGGER
+from ..utils.path_index import ENV_VARS
 
 
 class StravaObjects:
     """Access Strava with account and retrieve the club object."""
+
     # TODO: Add attributes in docs
 
     def __init__(self):
