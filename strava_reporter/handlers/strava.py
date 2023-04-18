@@ -11,9 +11,15 @@ from ..utils.path_index import ENV_VARS
 
 
 class StravaObjects:
-    """Access Strava with account and retrieve the club object."""
+    """Access Strava with account and retrieve the club object.
 
-    # TODO: Add attributes in docs
+    Attributes
+    ----------
+    client : :obj:`Client`
+        The Strava API client.
+    club : :obj:`Club`
+        The club object extracted through its id.
+    """
 
     def __init__(self):
         """Set instance attributes."""
