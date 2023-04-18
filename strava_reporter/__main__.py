@@ -6,7 +6,8 @@ import pandas as pd
 
 from strava_reporter.activities import Activities
 from strava_reporter.athletes import Athletes
-from strava_reporter.config import StravaObjects, ZappierData
+from strava_reporter.handlers.strava import StravaObjects
+from strava_reporter.handlers.database import DBHandler
 from strava_reporter.utils.log import LOGGER
 from strava_reporter.utils.time import str_to_timestamp
 
@@ -41,26 +42,19 @@ def main(
     ts = str_to_timestamp(date)
 
     strava_obj = StravaObjects()
+    db = DBHandler()
+    week_number = db.get_week_number(ts)
 
     all_activities = Activities()
     LOGGER.info("Retreiving activities...")
-    all_activities.fill_club_activities(strava_obj.club, n_skip, test)
+    all_activities.fill_club_activities(strava_obj.club, ts, n_skip, test)
     LOGGER.info("Activities received: {}".format(len(all_activities)))
-
-    zappier_data = ZappierData(ts)
-
-    if zappier_data.n_activities == len(all_activities):
-        LOGGER.info("Zappier and API activities match.")
-    else:
-        LOGGER.warning(
-            "Zappier and API activities do NOT match. {}/{}".format(
-                zappier_data.n_activities, len(all_activities)
-            )
-        )
+    all_activities.save_activities_to_db(db, week_number)
+    LOGGER.info("Activities saved to db...")
 
     athletes = Athletes()
     LOGGER.info("Assigning activities to athletes...")
-    athletes.assign_activities(all_activities)
+    athletes.assign_activities(all_activities, )
 
     LOGGER.info("Validating athlete's activities...")
     athletes.analyze(ts, test)

@@ -10,5 +10,9 @@
         "9e846ba62b247ee30150546022a52a82",
         "a0100bd094fd5e986d01239527b31910"
     ],
-    "last_updated": "2023-03-28"
+    "last_updated": "2023-03-28",
+    "paths": {
+        "db": "data/stravadictos.db",
+        "db_template": "data/stravadictos_template.db"
+    }
 }
