@@ -1,12 +1,12 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import pandas as pd
 
 from .utils.log import LOGGER
 from .utils.time import timestamp_to_compressed_str
 
-REPORT_FOLDER = Path(".").parent / "reports"
+REPORT_FOLDER = Path(".").parent / "data" / "reports"
 
 
 class WeeklyAnalysis:
