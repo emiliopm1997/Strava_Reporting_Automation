@@ -2,7 +2,7 @@
 import gspread
 import pandas as pd
 
-from ..config import GOOGLE_CONFIG
+from ..utils.path_index import GOOGLE_CONFIG
 from ..utils.time import timestamp_to_unix
 
 

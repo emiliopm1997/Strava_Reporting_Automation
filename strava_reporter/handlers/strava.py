@@ -5,7 +5,8 @@ from stravalib.client import Client
 from stravalib.exc import AccessUnauthorized
 from typing import Set
 
-from ..config import Config, ENV_VARS
+from ..config import Config
+from ..utils.path_index import ENV_VARS
 from ..utils.log import LOGGER
 
 

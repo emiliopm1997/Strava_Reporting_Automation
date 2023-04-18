@@ -1,11 +1,10 @@
 import shutil
 import sqlite3
 import pandas as pd
-from copy import deepcopy
 from pathlib import Path
 from typing import List, Optional
 
-from ..config import Config
+from ..utils.path_index import DATABASE, DATABASE_TEMPLATE
 from ..utils.log import LOGGER
 from ..utils.time import timestamp_to_unix, str_to_timestamp
 
@@ -212,17 +211,11 @@ class DBHandler(_ActivitiesTable, _AthletesTable, _WeeksTable):
 
     def __init__(self, set_template: Optional[bool] = False):
         """Set instance attributes."""
-        __config = Config()
-        db_path = Path(".").parent / deepcopy(__config.paths["db"])
-        db_template_path = (
-            Path(".").parent / deepcopy(__config.paths["db_template"])
-        )
-
         if not set_template:
-            self._validate_db(db_path, db_template_path)
-            self.conn = sqlite3.connect(db_path)
+            self._validate_db(DATABASE, DATABASE_TEMPLATE)
+            self.conn = sqlite3.connect(DATABASE)
         else:
-            self.conn = sqlite3.connect(db_template_path)
+            self.conn = sqlite3.connect(DATABASE_TEMPLATE)
         self.cur = self.conn.cursor()
 
     def _validate_db(self, db_path: Path, db_template_path: Path):

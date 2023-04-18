@@ -1,18 +1,9 @@
 import json
 from copy import deepcopy
-from pathlib import Path
 
 import pandas as pd
 
 from .utils.log import LOGGER
-
-# TODO: Insert this in config
-CONFIG_PATH = Path(".").parent / "config"
-CONFIG_JSON = CONFIG_PATH / "config.json"
-CONFIG_JSON_OLD = CONFIG_PATH / "old_config.json"
-GOOGLE_CONFIG = CONFIG_PATH / "google_spreadsheet_access.json"
-ENV_VARS = CONFIG_PATH / ".env"
-
 
 class Config:
     def __init__(self):
