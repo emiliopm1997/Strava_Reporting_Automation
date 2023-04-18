@@ -5,6 +5,8 @@ from typing import Any, Dict, Optional
 import pandas as pd
 from stravalib.model import Club
 
+from .utils.time import str_to_timestamp, timestamp_to_unix
+
 from .config import Config
 from .handlers.database import DBHandler
 
@@ -49,6 +51,7 @@ class Activities(list):
         candidates_to_stop = []
         hashed_activities = 3
         ignored = 0
+        count = 0
 
         # Note: result_fetcher only limits to 30 results
         for activity_raw in club.activities:
@@ -88,6 +91,10 @@ class Activities(list):
                 self.append(activity)
             processed_activities += 1
 
+            count += 1
+            if count == 10:
+                break
+
         self.__config.last_three_activities = last_activities_new
 
         if not test:
@@ -115,7 +122,8 @@ class Activities(list):
                 activity.name,
                 activity.athlete,
                 activity.time.total_seconds(),
-                activity.date
+                activity.date,
+                activity.date_unix
             )
 
 
@@ -131,6 +139,8 @@ class Activity:
         The athlete's name as it is outputed in Strava.
     date : str
         The date of when the activity took place.
+    date_unix : int
+        The date in unix format.
     name : str
         The name of the activity.
     time : :obj:`pd.Timedelta`
@@ -140,6 +150,7 @@ class Activity:
     activity_id: str
     athlete: str
     date: str
+    date_unix: int
     name: str
     time: pd.Timedelta
 
@@ -151,6 +162,7 @@ class Activity:
         )
         self.name = kwargs["name"]
         self.date = kwargs["date"]
+        self.date_unix = timestamp_to_unix(str_to_timestamp(self.date))
         self.time = pd.Timedelta(seconds=kwargs["elapsed_time"])
 
     def __repr__(self) -> str:

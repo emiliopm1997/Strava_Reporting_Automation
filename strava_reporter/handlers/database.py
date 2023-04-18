@@ -166,7 +166,8 @@ class _ActivitiesTable:
             name: str,
             athlete: str,
             duration_secs: int,
-            date: str
+            date: str,
+            date_unix: int
     ):
         """
         Add an activity to the database.
@@ -184,18 +185,44 @@ class _ActivitiesTable:
             method inside the StravaObjects class.
         duration_secs : int
             The number of seconds that this activity lasted.
-        date : int
+        date : str
             The date corresponding to this activity expressed as 'YYYY-MM-DD'.
+        date_unix : int
+            The previous date in the unix format.
         """
-        values = "('{}', {}, '{}', '{}', {}, '{}')".format(
+        values = "('{}', {}, '{}', '{}', {}, '{}', {})".format(
             activity_id,
             week_number,
             name,
             athlete,
             duration_secs,
-            date
+            date,
+            date_unix
         )
         self._insert(self.__table, values)
+
+    def get_last_hashes(self, ts: pd.Timestamp) -> List:
+        """Retrieve the hashes from the previous day.
+
+        Parameters
+        ----------
+        ts : :obj:`pd.Timestamp`
+            A local timestamp.
+
+        Return
+        ------
+        list
+            The list of the hashes from the previous day.
+        """
+        day_before = ts - pd.Timedelta(days=1)
+        day_before = str(day_before)[:10]
+
+        what = "activity_id"
+        conditions = f"WHERE date = '{day_before}'"
+
+        res = self._select(what, self.__table, conditions)
+        res = [x[0] for x in res]  # Remove tuple level
+        return res
 
 
 class DBHandler(_ActivitiesTable, _AthletesTable, _WeeksTable):

@@ -9,4 +9,4 @@ rebuild_package:
 
 run:
 	pip install .
-	python -m strava_reporter --test true
+	python -m strava_reporter --test true --date "2023-04-19"
