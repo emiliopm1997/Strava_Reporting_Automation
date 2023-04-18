@@ -44,6 +44,7 @@ def main(
     strava_obj = StravaObjects()
     db = DBHandler()
     week_number = db.get_week_number(ts)
+    last_hashes = db.get_last_hashes(ts)
 
     all_activities = Activities()
     LOGGER.info("Retreiving activities...")
@@ -54,7 +55,7 @@ def main(
 
     athletes = Athletes()
     LOGGER.info("Assigning activities to athletes...")
-    athletes.assign_activities(all_activities, )
+    athletes.assign_activities(all_activities)
 
     LOGGER.info("Validating athlete's activities...")
     athletes.analyze(ts, test)
