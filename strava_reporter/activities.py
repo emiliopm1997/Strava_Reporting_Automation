@@ -42,6 +42,8 @@ class Activities(list):
         self.clear()
         processed_activities = 0
 
+        # TODO: Once there is info on db we can limit this to go until a
+        # TODO: hash is repeated.
         last_activities = self.__config.last_three_activities
         last_activities_new = []
         candidates_to_stop = []

@@ -6,7 +6,7 @@ import pandas as pd
 
 from strava_reporter.activities import Activities
 from strava_reporter.athletes import Athletes
-from strava_reporter.config import StravaObjects
+from strava_reporter.handlers.strava import StravaObjects
 from strava_reporter.handlers.database import DBHandler
 from strava_reporter.utils.log import LOGGER
 from strava_reporter.utils.time import str_to_timestamp
@@ -47,7 +47,7 @@ def main(
 
     all_activities = Activities()
     LOGGER.info("Retreiving activities...")
-    all_activities.fill_club_activities(strava_obj.club, date, n_skip, test)
+    all_activities.fill_club_activities(strava_obj.club, ts, n_skip, test)
     LOGGER.info("Activities received: {}".format(len(all_activities)))
     all_activities.save_activities_to_db(db, week_number)
     LOGGER.info("Activities saved to db...")
