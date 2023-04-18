@@ -113,7 +113,8 @@ class Activities(list):
                 week_number,
                 activity.name,
                 activity.athlete,
-                activity.time.total_seconds()
+                activity.time.total_seconds(),
+                activity.date
             )
 
 

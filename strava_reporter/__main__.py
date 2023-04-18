@@ -7,7 +7,7 @@ import pandas as pd
 from strava_reporter.activities import Activities
 from strava_reporter.athletes import Athletes
 from strava_reporter.config import StravaObjects
-from strava_reporter.database import DBHandler
+from strava_reporter.handlers.database import DBHandler
 from strava_reporter.utils.log import LOGGER
 from strava_reporter.utils.time import str_to_timestamp
 
