@@ -1,12 +1,13 @@
 import shutil
 import sqlite3
-import pandas as pd
 from pathlib import Path
 from typing import List, Optional
 
-from ..utils.path_index import DATABASE, DATABASE_TEMPLATE
+import pandas as pd
+
 from ..utils.log import LOGGER
-from ..utils.time import timestamp_to_unix, str_to_timestamp
+from ..utils.path_index import DATABASE, DATABASE_TEMPLATE
+from ..utils.time import str_to_timestamp, timestamp_to_unix
 
 
 class _AthletesTable:
