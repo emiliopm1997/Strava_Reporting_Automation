@@ -60,8 +60,9 @@ def main(
         test
     )
     LOGGER.info("Activities received: {}".format(len(all_activities)))
-    all_activities.save_activities_to_db(db, week_number)
-    LOGGER.info("Activities saved to db...")
+    if not test:
+        all_activities.save_activities_to_db(db, week_number)
+        LOGGER.info("Activities saved to db...")
 
     athletes = Athletes()
     LOGGER.info("Assigning activities to athletes...")

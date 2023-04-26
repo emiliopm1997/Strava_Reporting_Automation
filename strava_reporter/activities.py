@@ -16,7 +16,7 @@ class Activities(list):
         self,
         club: "Club",
         date: pd.Timestamp,
-        last_hashes: List,
+        last_hashes: List[str],
         stop_after: Optional[int] = None,
         to_ignore: Optional[int] = 0,
         test: Optional[bool] = False,
@@ -30,7 +30,7 @@ class Activities(list):
             The club object from where the activities are registered.
         date : :obj:`pd.Timestamp`
             The date of the activity.
-        last_hashes : List
+        last_hashes : List[str]
             A list of the hashes from the previous date.
         stop_after : Optional[int]
             Number of activities to read before stopping.
@@ -54,11 +54,17 @@ class Activities(list):
                 continue
 
             activity_raw_dict = activity_raw.to_dict()
-            activity_raw_dict["date"] = str(date)[:10]
+            # Get hash on yesterday's date to check whether this activity was
+            # already processed.
+            activity_raw_dict["date"] = str(date - pd.Timedelta(days=1))[:10]
             activity_hash = self.dict_hash(activity_raw_dict)
 
             if activity_hash in last_hashes:
                 break
+            else:
+                # Correct the hash.
+                activity_raw_dict["date"] = str(date)[:10]
+                activity_hash = self.dict_hash(activity_raw_dict)
 
             activity = Activity(activity_id=activity_hash, **activity_raw_dict)
             self.append(activity)

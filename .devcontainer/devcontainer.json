@@ -19,7 +19,8 @@
 				"python.formatting.autopep8Path": "/opt/conda/envs/py_env/bin/autopep8",
 				"python.linting.flake8Path": "/opt/conda/envs/py_env/bin/flake8",
 				"python.linting.flake8Enabled": true,
-				"python.sortImports.path": "/opt/conda/envs/py_env/bin/isort"
+				"python.sortImports.path": "/opt/conda/envs/py_env/bin/isort",
+				"autoDocstring.docstringFormat": "numpy"
 			},
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [

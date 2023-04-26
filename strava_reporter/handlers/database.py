@@ -224,6 +224,18 @@ class _ActivitiesTable:
         res = [x[0] for x in res]  # Remove tuple level
         return res
 
+    def drop_activity_by_hash(self, hash: str):
+        """
+        Drop activity by hash.
+
+        Parameters
+        ----------
+        hash : str
+            The hash of the activity to be dropped.
+        """
+        condition = f"activity_id = '{hash}'"
+        self._delete(self.__table, condition)
+
 
 class DBHandler(_ActivitiesTable, _AthletesTable, _WeeksTable):
     """
