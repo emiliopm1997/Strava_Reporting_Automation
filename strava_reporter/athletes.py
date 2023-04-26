@@ -6,6 +6,7 @@ import pandas as pd
 
 from .activities import Activities
 from .analysis import WeeklyAnalysis
+from .handlers.database import DBHandler
 from .utils.log import LOGGER
 
 ATHLETES_JSON = Path(".").parent / "config" / "athletes.json"
@@ -63,8 +64,8 @@ class Athletes:
 
     def __init__(self):
         """Set instance attributes."""
-        with open(ATHLETES_JSON, "r") as f:
-            athletes_raw = json.load(f)
+        db = DBHandler()
+        athletes_raw = db.get_active_athletes()
 
         for athlete in athletes_raw:
             setattr(self, athlete["strava_name"], Athlete(**athlete))

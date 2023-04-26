@@ -1,7 +1,7 @@
 import shutil
 import sqlite3
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import pandas as pd
 
@@ -77,6 +77,22 @@ class _AthletesTable:
         changes = f"weeks_completed = {new_weeks}"
         condition = f"strava_name = '{strava_name}'"
         self._update(self.__table, changes, condition)
+
+    def get_active_athletes(self) -> List[Dict[str, str]]:
+        """
+        Retreive the active athletes in the challenge.
+
+        Returns
+        -------
+        List[Dict[str, str]]
+            A list with dictionaries that contain the names of the athletes as
+            they truly are and how they appear in Strava.
+        """
+        cols = "name, strava_name"
+        additionals = ("WHERE active = 1")
+        res = self._select(cols, self.__table, additionals)
+
+        return [{"name": x, "strava_name": y} for x, y in res]
 
 
 class _WeeksTable:
