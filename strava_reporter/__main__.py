@@ -70,7 +70,15 @@ def main(
 
 
 def analyze(week_number: int):
+    """
+    Perform a weekly analysis with activities data.
 
+    Parameters
+    ----------
+    week_number : int
+        The week of interest to perform the analysis.
+    """
+    LOGGER.info("Analysis starting...")
     weekly_activities = Activities()
     LOGGER.info(f"Retreiving activities from week {week_number}...")
     weekly_activities.get_weekly_activities_from_db(week_number)
@@ -81,6 +89,7 @@ def analyze(week_number: int):
 
     LOGGER.info("Validating athlete's activities...")
     athletes.analyze(week_number)
+    LOGGER.info("Analysis performed correctly!")
 
 
 def wait():

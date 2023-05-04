@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 from stravalib.model import Club
 
-from .utils.time import str_to_timestamp, timestamp_to_unix
 from .handlers.database import DBHandler
+from .utils.time import str_to_timestamp, timestamp_to_unix
 
 
 class Activities(list):

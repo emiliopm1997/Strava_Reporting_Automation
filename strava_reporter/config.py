@@ -1,4 +1,5 @@
 import json
+
 from .utils.path_index import CONFIG_JSON
 
 

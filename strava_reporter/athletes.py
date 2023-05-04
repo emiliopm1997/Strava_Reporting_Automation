@@ -1,8 +1,6 @@
 from pathlib import Path
 from typing import List
 
-import pandas as pd
-
 from .activities import Activities
 from .analysis import WeeklyAnalysis
 from .handlers.database import DBHandler

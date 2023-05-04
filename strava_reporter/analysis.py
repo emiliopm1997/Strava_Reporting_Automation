@@ -1,17 +1,36 @@
 from pathlib import Path
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import pandas as pd
 
 from .utils.log import LOGGER
 from .utils.time import Week, timestamp_to_unix, unix_to_timestamp
 
+if TYPE_CHECKING:
+    from .activities import Activity
+    from .athletes import Athlete
+
 REPORT_FOLDER = Path(".").parent / "data" / "reports"
 
 
 class Counter:
+    """
+    Counter object for athlete's weekly activities.
+
+    Attributes
+    ----------
+    time_counter : Dict[int, pd.Timedelta]
+        A dictionary of the total time an athlete spent performing physical
+        activity. Keys represent a day of the week (in unix).
+    day_counter : Dict[int, int]
+        A dictionary indicating whether the activities on a given day count
+        towards the challenge. Keys represent a day of the week (in unix).
+    athlete_name : str
+        The athlete's name.
+    """
 
     def __init__(self, week: Week, athlete_name: str):
+        """Set instance attributes."""
         week_dates = [
             timestamp_to_unix(week.week_start + pd.Timedelta(days=i))
             for i in range(7)
@@ -38,7 +57,7 @@ class Counter:
         for date, time in self.time_counter.items():
             if time >= minimum_time:
                 self.day_counter[date] = 1
-            else:
+            elif time > pd.Timedelta(seconds=0):
                 LOGGER.info(
                     "The activities of '{}' on {} are not valid.".format(
                         self.athlete_name, str(unix_to_timestamp(date))[:10]
@@ -110,7 +129,8 @@ class WeeklyAnalysis:
         self._add_athletes_data(athlete, counter)
 
     def _add_athletes_data(self, athlete: "Athlete", counter: "Counter"):
-        """_summary_
+        """
+        Add athlete's counter to data.
 
         Parameters
         ----------
