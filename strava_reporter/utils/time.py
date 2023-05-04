@@ -83,3 +83,16 @@ def str_to_timestamp(date: str) -> pd.Timestamp:
         else pd.Timestamp(date, tz="America/Mexico_City")
     )
     return ts
+
+
+class Week:
+    """Object that organizes the weekly data."""
+
+    def __init__(self, **kwargs):
+        """Set instance attributes."""
+        for t in ["week_start", "week_end"]:
+            time = kwargs.get(t)
+            if time:
+                setattr(self, t, str_to_timestamp(time))
+                kwargs.pop(t)
+        self.__dict__.update(kwargs)

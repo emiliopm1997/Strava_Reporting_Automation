@@ -12,6 +12,21 @@ from .handlers.database import DBHandler
 class Activities(list):
     """Generalized object for activities."""
 
+    def get_weekly_activities_from_db(self, week_number: int):
+        """
+        Retrieve activities from a specific week in the db.
+
+        Parameters
+        ----------
+        week_number : int
+            The week number corresponding to the data we want to retrieve.
+        """
+        db = DBHandler()
+        weekly_activities = db.get_weekly_activities(week_number)
+
+        for activity in weekly_activities:
+            self.append(Activity(**activity))
+
     def fill_club_activities(
         self,
         club: "Club",
@@ -95,7 +110,7 @@ class Activities(list):
                 activity.name,
                 activity.athlete,
                 activity.time.total_seconds(),
-                activity.date,
+                str(activity.date)[:10],
                 activity.date_unix
             )
 
@@ -110,7 +125,7 @@ class Activity:
         The unique activity id.
     athlete : str
         The athlete's name as it is outputed in Strava.
-    date : str
+    date : :obj:`pd.Timestamp`
         The date of when the activity took place.
     date_unix : int
         The date in unix format.
@@ -122,7 +137,7 @@ class Activity:
 
     activity_id: str
     athlete: str
-    date: str
+    date: pd.Timestamp
     date_unix: int
     name: str
     time: pd.Timedelta
@@ -130,14 +145,22 @@ class Activity:
     def __init__(self, **kwargs):
         """Set instance attributes."""
         self.activity_id = kwargs["activity_id"]
-        self.athlete = "{} {}".format(
-            kwargs["athlete"]["firstname"], kwargs["athlete"]["lastname"]
-        )
+
+        if isinstance(kwargs["athlete"], str):
+            self.athlete = kwargs["athlete"]
+        else:
+            self.athlete = "{} {}".format(
+                kwargs["athlete"]["firstname"], kwargs["athlete"]["lastname"]
+            )
+
         self.name = kwargs["name"]
-        self.date = kwargs["date"]
-        self.date_unix = timestamp_to_unix(str_to_timestamp(self.date))
-        self.time = pd.Timedelta(seconds=kwargs["elapsed_time"])
+        self.date = str_to_timestamp(kwargs["date"])
+        self.date_unix = timestamp_to_unix(self.date)
+        secs = (kwargs["elapsed_time"]
+                if kwargs.get("elapsed_time")
+                else kwargs.get("duration_secs"))
+        self.time = pd.Timedelta(seconds=secs)
 
     def __repr__(self) -> str:
         """Representation of the object."""
-        return "{} ({})".format(self.name, self.time)
+        return "{} ({}, {})".format(self.name, self.athlete, self.time)

@@ -1,7 +1,7 @@
 import shutil
 import sqlite3
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
@@ -164,10 +164,34 @@ class _WeeksTable:
         """
         unix_ts = timestamp_to_unix(ts)
         col = "week_number"
-        additionals = ("WHERE {} BETWEEN week_start_unix "
-                       "AND week_end_unix".format(unix_ts))
+        additionals = ("WHERE {0} >= week_start_unix "
+                       "AND {0} < week_end_unix".format(unix_ts))
         res = self._select(col, self.__table, additionals)
         return res[0][0]
+
+    def get_week_information(self, week_num: int) -> Dict[str, Any]:
+        """
+        Retreive the week data based on a week number.
+
+        Parameters
+        ----------
+        week_num : int
+            The week number which we want to extract the data from.
+
+        Returns
+        -------
+        Dict[str, Any]
+            The week data in the form of a dictionary.
+        """
+        columns = [
+            "week_number", "week_start", "week_end", "week_start_unix",
+            "week_end_unix"
+        ]
+        what = ", ".join(columns)
+        additionals = ("WHERE week_number = {}".format(week_num))
+        res = self._select(what, self.__table, additionals)
+        week_data = pd.DataFrame(res, columns=columns).to_dict("records")[0]
+        return week_data
 
 
 class _ActivitiesTable:
@@ -217,7 +241,7 @@ class _ActivitiesTable:
         )
         self._insert(self.__table, values)
 
-    def get_last_hashes(self, ts: pd.Timestamp) -> List:
+    def get_last_hashes(self, ts: pd.Timestamp) -> List[str]:
         """Retrieve the hashes from the previous day.
 
         Parameters
@@ -227,7 +251,7 @@ class _ActivitiesTable:
 
         Return
         ------
-        list
+        List[str]
             The list of the hashes from the previous day.
         """
         day_before = ts - pd.Timedelta(days=1)
@@ -239,6 +263,28 @@ class _ActivitiesTable:
         res = self._select(what, self.__table, conditions)
         res = [x[0] for x in res]  # Remove tuple level
         return res
+
+    def get_weekly_activities(self, week_num: int) -> List[Dict[str, Any]]:
+        """Retrieve the activities from a given week.
+
+        Parameters
+        ----------
+        week_num : int
+            The week number of interest.
+
+        Return
+        ------
+        List[Dict[str, Any]]
+            A list of the weekly activities in the form of a dictionary.
+        """
+        columns = [
+            "activity_id", "athlete", "name",
+            "date", "date_unix", "duration_secs"
+        ]
+        what = ", ".join(columns)
+        conditions = f"WHERE week_number = {week_num}"
+        res = self._select(what, self.__table, conditions)
+        return pd.DataFrame(res, columns=columns).to_dict("records")
 
     def drop_activity_by_hash(self, hash: str):
         """

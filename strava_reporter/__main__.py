@@ -59,18 +59,28 @@ def main(
         n_skip,
         test
     )
+
     LOGGER.info("Activities received: {}".format(len(all_activities)))
+    LOGGER.info(all_activities)
     if not test:
         all_activities.save_activities_to_db(db, week_number)
         LOGGER.info("Activities saved to db...")
 
+    LOGGER.info("Main process completed succesfully!\n")
+
+
+def analyze(week_number: int):
+
+    weekly_activities = Activities()
+    LOGGER.info(f"Retreiving activities from week {week_number}...")
+    weekly_activities.get_weekly_activities_from_db(week_number)
+
     athletes = Athletes()
     LOGGER.info("Assigning activities to athletes...")
-    athletes.assign_activities(all_activities)
+    athletes.assign_activities(weekly_activities)
 
     LOGGER.info("Validating athlete's activities...")
-    athletes.analyze(ts, test)
-    LOGGER.info("Main process completed succesfully!\n")
+    athletes.analyze(week_number)
 
 
 def wait():
@@ -94,6 +104,14 @@ def wait():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--analysis",
+        required=False,
+        type=int,
+        default=None,
+        dest="analysis",
+        help="The week number of the analysis to be conducted.",
+    )
     parser.add_argument(
         "--date",
         required=False,
@@ -129,4 +147,8 @@ if __name__ == "__main__":
         help="Whether the code is being run as a test.",
     )
     args = parser.parse_args()
-    main(args.date, args.stop_after, args.n_skip, args.test)
+
+    if args.analysis:
+        analyze(args.analysis)
+    else:
+        main(args.date, args.stop_after, args.n_skip, args.test)
