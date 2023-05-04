@@ -1,12 +1,11 @@
-import json
 from pathlib import Path
-from typing import List, Optional
-
-import pandas as pd
+from typing import List
 
 from .activities import Activities
 from .analysis import WeeklyAnalysis
+from .handlers.database import DBHandler
 from .utils.log import LOGGER
+from .utils.time import Week
 
 ATHLETES_JSON = Path(".").parent / "config" / "athletes.json"
 
@@ -23,8 +22,6 @@ class Athlete:
         The athlete's name as it is outputed in Strava.
     activities: :obj:`Activities`
         The activities that the athlete has completed.
-    total_time: :obj:`pd.Timedelta`
-        Total activity time that the athlete has completed.
     """
 
     def __init__(self, name: str, strava_name: str):
@@ -32,14 +29,6 @@ class Athlete:
         self.name = name
         self.strava_name = strava_name
         self.activities = Activities()
-
-    @property
-    def total_time(self):
-        """Sum entire time."""
-        total_time = pd.Timedelta(minutes=0)
-        for activity in self.activities:
-            total_time += activity.time
-        return total_time
 
     def __repr__(self) -> str:
         """Representation of the object."""
@@ -63,8 +52,8 @@ class Athletes:
 
     def __init__(self):
         """Set instance attributes."""
-        with open(ATHLETES_JSON, "r") as f:
-            athletes_raw = json.load(f)
+        self._db = DBHandler()
+        athletes_raw = self._db.get_active_athletes()
 
         for athlete in athletes_raw:
             setattr(self, athlete["strava_name"], Athlete(**athlete))
@@ -106,37 +95,19 @@ class Athletes:
             if athlete:
                 athlete.activities.append(activity)
 
-    def analyze(self, ts: pd.Timestamp, test: Optional[bool] = False):
+    def analyze(self, week_number: int):
         """
         Analyze the daily activities and save the data on a csv.
 
-        Parameters
-        ----------
-        ts : :obj:`pd.DataFrame`
-            The timestamp for the anlysis.
-        test : Optional[bool]
-            True for test runs, otherwise False.
+        week_number : int
+            The week number of the analysis
         """
-        # Added 3 min tolerance.
-        minimum_time = pd.Timedelta(minutes=27)
-
-        analysis = WeeklyAnalysis(self.athlete_names, ts)
+        week_data = Week(**self._db.get_week_information(week_number))
+        analysis = WeeklyAnalysis(self.athlete_names, week_data)
 
         # Update table based on the athletes activity.
         for athlete_name in self.athlete_strava_names:
             athlete = self.get_athlete(athlete_name)
+            analysis.count_athlete_activities(athlete)
 
-            # Validate that the total activity is greater than the min time.
-            if athlete.total_time >= minimum_time:
-                analysis.count_athlete_activity(athlete=athlete.name)
-            elif athlete.total_time > pd.Timedelta(seconds=0):
-                LOGGER.info(
-                    "The activities of '{}' are not valid.".format(athlete)
-                )
-
-        analysis.update_total_counts()
-
-        if test:
-            print(analysis.data)
-        else:
-            analysis.save()
+        analysis.save()

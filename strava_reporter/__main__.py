@@ -14,6 +14,7 @@ from strava_reporter.utils.time import str_to_timestamp
 
 def main(
     date: Optional[str] = "today",
+    stop_after: Optional[int] = None,
     n_skip: Optional[int] = 0,
     test: Optional[bool] = False,
 ):
@@ -24,6 +25,8 @@ def main(
     ----------
     date : Optional[str]
         The date of the analysis.
+    stop_after : Optional[str]
+        Number of activities to record.
     n_skip: Optional[int]
         Number of activities to skip.
     test : Optional[bool]
@@ -48,18 +51,45 @@ def main(
 
     all_activities = Activities()
     LOGGER.info("Retreiving activities...")
-    all_activities.fill_club_activities(strava_obj.club, ts, n_skip, test)
+    all_activities.fill_club_activities(
+        strava_obj.club,
+        ts,
+        last_hashes,
+        stop_after,
+        n_skip,
+        test
+    )
+
     LOGGER.info("Activities received: {}".format(len(all_activities)))
-    all_activities.save_activities_to_db(db, week_number)
-    LOGGER.info("Activities saved to db...")
+    LOGGER.info(all_activities)
+    if not test:
+        all_activities.save_activities_to_db(db, week_number)
+        LOGGER.info("Activities saved to db...")
+
+    LOGGER.info("Main process completed succesfully!\n")
+
+
+def analyze(week_number: int):
+    """
+    Perform a weekly analysis with activities data.
+
+    Parameters
+    ----------
+    week_number : int
+        The week of interest to perform the analysis.
+    """
+    LOGGER.info("Analysis starting...")
+    weekly_activities = Activities()
+    LOGGER.info(f"Retreiving activities from week {week_number}...")
+    weekly_activities.get_weekly_activities_from_db(week_number)
 
     athletes = Athletes()
     LOGGER.info("Assigning activities to athletes...")
-    athletes.assign_activities(all_activities)
+    athletes.assign_activities(weekly_activities)
 
     LOGGER.info("Validating athlete's activities...")
-    athletes.analyze(ts, test)
-    LOGGER.info("Main process completed succesfully!\n")
+    athletes.analyze(week_number)
+    LOGGER.info("Analysis performed correctly!")
 
 
 def wait():
@@ -84,12 +114,28 @@ def wait():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--analysis",
+        required=False,
+        type=int,
+        default=None,
+        dest="analysis",
+        help="The week number of the analysis to be conducted.",
+    )
+    parser.add_argument(
         "--date",
         required=False,
         type=str,
         default="today",
         dest="date",
         help="The date for the analysis as yyyy-mm-dd or 'today' (default).",
+    )
+    parser.add_argument(
+        "--stop_after",
+        required=False,
+        type=int,
+        default=None,
+        dest="stop_after",
+        help="The number of activities to record.",
     )
     parser.add_argument(
         "--n_skip",
@@ -102,12 +148,15 @@ if __name__ == "__main__":
 
     # TODO: Replace by unittests.
     parser.add_argument(
+        "-t",
         "--test",
-        required=False,
-        type=bool,
-        default=False,
+        action='store_true',
         dest="test",
         help="Whether the code is being run as a test.",
     )
     args = parser.parse_args()
-    main(args.date, args.n_skip, args.test)
+
+    if args.analysis:
+        analyze(args.analysis)
+    else:
+        main(args.date, args.stop_after, args.n_skip, args.test)

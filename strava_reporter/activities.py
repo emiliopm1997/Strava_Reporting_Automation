@@ -1,28 +1,38 @@
 import hashlib
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 from stravalib.model import Club
 
-from .utils.time import str_to_timestamp, timestamp_to_unix
-
-from .config import Config
 from .handlers.database import DBHandler
+from .utils.time import str_to_timestamp, timestamp_to_unix
 
 
 class Activities(list):
     """Generalized object for activities."""
 
-    def __init__(self):
-        """Set instance attributes."""
-        super().__init__()
-        self.__config = Config()
+    def get_weekly_activities_from_db(self, week_number: int):
+        """
+        Retrieve activities from a specific week in the db.
+
+        Parameters
+        ----------
+        week_number : int
+            The week number corresponding to the data we want to retrieve.
+        """
+        db = DBHandler()
+        weekly_activities = db.get_weekly_activities(week_number)
+
+        for activity in weekly_activities:
+            self.append(Activity(**activity))
 
     def fill_club_activities(
         self,
         club: "Club",
         date: pd.Timestamp,
+        last_hashes: List[str],
+        stop_after: Optional[int] = None,
         to_ignore: Optional[int] = 0,
         test: Optional[bool] = False,
     ):
@@ -35,6 +45,10 @@ class Activities(list):
             The club object from where the activities are registered.
         date : :obj:`pd.Timestamp`
             The date of the activity.
+        last_hashes : List[str]
+            A list of the hashes from the previous date.
+        stop_after : Optional[int]
+            Number of activities to read before stopping.
         to_ignore: Optional[int]
             Number of activities to ignore, starting from the top. Mainly used
             when analysis is delayed.
@@ -44,14 +58,7 @@ class Activities(list):
         self.clear()
         processed_activities = 0
 
-        # TODO: Once there is info on db we can limit this to go until a
-        # TODO: hash is repeated.
-        last_activities = self.__config.last_three_activities
-        last_activities_new = []
-        candidates_to_stop = []
-        hashed_activities = 3
         ignored = 0
-        count = 0
 
         # Note: result_fetcher only limits to 30 results
         for activity_raw in club.activities:
@@ -61,44 +68,25 @@ class Activities(list):
                 ignored += 1
                 continue
 
-            is_candidate = False
             activity_raw_dict = activity_raw.to_dict()
-            activity_raw_dict["date"] = str(date)[:10]
+            # Get hash on yesterday's date to check whether this activity was
+            # already processed.
+            activity_raw_dict["date"] = str(date - pd.Timedelta(days=1))[:10]
             activity_hash = self.dict_hash(activity_raw_dict)
-            activity = Activity(activity_id=activity_hash, **activity_raw_dict)
 
-            # The first 3 activity hashes will be directly saved.
-            if processed_activities < hashed_activities:
-                last_activities_new.append(activity_hash)
-
-            # Check if the activity matches the last activities hashes.
-            if activity_hash == last_activities[len(candidates_to_stop)]:
-                candidates_to_stop.append(activity)
-                is_candidate = True
-
-            # Actions taken if last activities are candidates of being the
-            # previous last.
-            if len(candidates_to_stop) == hashed_activities:
-                # When the last three activities are found (as the pattern).
+            if activity_hash in last_hashes:
                 break
-            elif len(candidates_to_stop) > 0 and not is_candidate:
-                # When the last activity candidate prove to actually not be
-                # the last three.
-                self += self + candidates_to_stop
-                candidates_to_stop.clear()
+            else:
+                # Correct the hash.
+                activity_raw_dict["date"] = str(date)[:10]
+                activity_hash = self.dict_hash(activity_raw_dict)
 
-            if not is_candidate:
-                self.append(activity)
+            activity = Activity(activity_id=activity_hash, **activity_raw_dict)
+            self.append(activity)
             processed_activities += 1
 
-            count += 1
-            if count == 10:
+            if processed_activities == stop_after:
                 break
-
-        self.__config.last_three_activities = last_activities_new
-
-        if not test:
-            self.__config.save()
 
     def dict_hash(self, dictionary: Dict[str, Any]) -> str:
         """MD5 hash of a dictionary."""
@@ -122,7 +110,7 @@ class Activities(list):
                 activity.name,
                 activity.athlete,
                 activity.time.total_seconds(),
-                activity.date,
+                str(activity.date)[:10],
                 activity.date_unix
             )
 
@@ -137,7 +125,7 @@ class Activity:
         The unique activity id.
     athlete : str
         The athlete's name as it is outputed in Strava.
-    date : str
+    date : :obj:`pd.Timestamp`
         The date of when the activity took place.
     date_unix : int
         The date in unix format.
@@ -149,7 +137,7 @@ class Activity:
 
     activity_id: str
     athlete: str
-    date: str
+    date: pd.Timestamp
     date_unix: int
     name: str
     time: pd.Timedelta
@@ -157,14 +145,22 @@ class Activity:
     def __init__(self, **kwargs):
         """Set instance attributes."""
         self.activity_id = kwargs["activity_id"]
-        self.athlete = "{} {}".format(
-            kwargs["athlete"]["firstname"], kwargs["athlete"]["lastname"]
-        )
+
+        if isinstance(kwargs["athlete"], str):
+            self.athlete = kwargs["athlete"]
+        else:
+            self.athlete = "{} {}".format(
+                kwargs["athlete"]["firstname"], kwargs["athlete"]["lastname"]
+            )
+
         self.name = kwargs["name"]
-        self.date = kwargs["date"]
-        self.date_unix = timestamp_to_unix(str_to_timestamp(self.date))
-        self.time = pd.Timedelta(seconds=kwargs["elapsed_time"])
+        self.date = str_to_timestamp(kwargs["date"])
+        self.date_unix = timestamp_to_unix(self.date)
+        secs = (kwargs["elapsed_time"]
+                if kwargs.get("elapsed_time")
+                else kwargs.get("duration_secs"))
+        self.time = pd.Timedelta(seconds=secs)
 
     def __repr__(self) -> str:
         """Representation of the object."""
-        return "{} ({})".format(self.name, self.time)
+        return "{} ({}, {})".format(self.name, self.athlete, self.time)

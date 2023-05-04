@@ -1,12 +1,68 @@
 from pathlib import Path
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import pandas as pd
 
 from .utils.log import LOGGER
-from .utils.time import timestamp_to_compressed_str
+from .utils.time import Week, timestamp_to_unix, unix_to_timestamp
+
+if TYPE_CHECKING:
+    from .activities import Activity
+    from .athletes import Athlete
 
 REPORT_FOLDER = Path(".").parent / "data" / "reports"
+
+
+class Counter:
+    """
+    Counter object for athlete's weekly activities.
+
+    Attributes
+    ----------
+    time_counter : Dict[int, pd.Timedelta]
+        A dictionary of the total time an athlete spent performing physical
+        activity. Keys represent a day of the week (in unix).
+    day_counter : Dict[int, int]
+        A dictionary indicating whether the activities on a given day count
+        towards the challenge. Keys represent a day of the week (in unix).
+    athlete_name : str
+        The athlete's name.
+    """
+
+    def __init__(self, week: Week, athlete_name: str):
+        """Set instance attributes."""
+        week_dates = [
+            timestamp_to_unix(week.week_start + pd.Timedelta(days=i))
+            for i in range(7)
+        ]
+        self.time_counter = {x: pd.Timedelta(seconds=0) for x in week_dates}
+        self.day_counter = {x: None for x in week_dates}
+        self.athlete_name = athlete_name
+
+    def add_activity(self, activity: "Activity"):
+        """
+        Add activity duration to counter.
+
+        Parameters
+        ----------
+        activity : :obj:`Activity`
+            The activity object to add.
+        """
+        self.time_counter[activity.date_unix] += activity.time
+
+    def validate_activities(self):
+        """Validate activities."""
+        # Added 3 min tolerance.
+        minimum_time = pd.Timedelta(minutes=27)
+        for date, time in self.time_counter.items():
+            if time >= minimum_time:
+                self.day_counter[date] = 1
+            elif time > pd.Timedelta(seconds=0):
+                LOGGER.info(
+                    "The activities of '{}' on {} are not valid.".format(
+                        self.athlete_name, str(unix_to_timestamp(date))[:10]
+                    )
+                )
 
 
 class WeeklyAnalysis:
@@ -32,40 +88,21 @@ class WeeklyAnalysis:
         The date of the beginning of the week.
     """
 
-    def __init__(self, athletes: List[str], ts: pd.Timestamp):
+    def __init__(self, athletes: List[str], week: Week):
         """Set instance attributes."""
-        self.date = ts
-        self.last_monday = self.date - pd.Timedelta(days=self.date.day_of_week)
-        file_name = self._get_file_name()
+        self.week = week
+        file_name = "athlete_records_{}.csv".format(self.week.week_number)
         self.file_path = REPORT_FOLDER / file_name
-        self.col_date = self._get_column_name(self.date)
 
-        if self.file_path.exists():
-            LOGGER.info("File '{}' exist. Reading file...".format(file_name))
-            self.data = pd.read_csv(self.file_path)
-        else:
-            LOGGER.info(
-                "File '{}' doesn't exist. Creating template...".format(
-                    file_name
-                )
-            )
-            self.data = self._get_data_template(athletes)
-
-    def _get_file_name(self) -> str:
-        next_sunday = self.last_monday + pd.Timedelta(days=6)
-
-        data_name = "athlete_records_{}_{}.csv".format(
-            timestamp_to_compressed_str(self.last_monday),
-            timestamp_to_compressed_str(next_sunday),
-        )
-        return data_name
+        self.data = self._get_data_template(athletes)
 
     def _get_data_template(self, athletes: List[str]) -> pd.DataFrame:
         columns = []
         columns.append("ATHLETE")
+
         for i in range(7):
-            day = self.last_monday + pd.Timedelta(days=i)
-            columns.append(self._get_column_name(day))
+            day = self.week.week_start + pd.Timedelta(days=i)
+            columns.append(day.day_name().upper())
 
         data = pd.DataFrame(columns=columns)
         data["ATHLETE"] = athletes
@@ -73,36 +110,44 @@ class WeeklyAnalysis:
 
         return data
 
-    def _get_column_name(self, day: pd.Timestamp) -> str:
-        day_name = day.day_name().upper()[:3]
-        col_name = "{}_{}".format(
-            day_name, timestamp_to_compressed_str(day)[:4]
-        )
-        return col_name
-
-    def count_athlete_activity(self, athlete: str):
+    def count_athlete_activities(self, athlete: "Athlete"):
         """
         Count the daily activities of a given athlete.
 
         Parameters
         ----------
-        athlete : str
-            The name of the athlete that completed the daily activity.
+        athlete : Athlete
+            An athlete with their data.
         """
-        self.data.loc[self.data["ATHLETE"] == athlete, self.col_date] = 1
+        if not athlete.activities:
+            return
 
-    def update_total_counts(self):
-        """Update the total counts of every athlete."""
-        LOGGER.info("Updating total counts...")
-        cols_to_sum = [
-            col
-            for col in self.data.columns
-            if col not in ["ATHLETE", "TOTAL_DAYS"]
-        ]
+        counter = Counter(self.week, athlete.name)
+        for activity in athlete.activities:
+            counter.add_activity(activity)
+        counter.validate_activities()
+        self._add_athletes_data(athlete, counter)
 
-        self.data["TOTAL_DAYS"] = (
-            self.data[cols_to_sum].sum(axis=1).astype("int64")
-        )
+    def _add_athletes_data(self, athlete: "Athlete", counter: "Counter"):
+        """
+        Add athlete's counter to data.
+
+        Parameters
+        ----------
+        athlete : "Athlete"
+            The athlete's object and its data.
+        counter : "Counter"
+            The athlete's weekly counter.
+        """
+        week = {
+            unix_to_timestamp(u).day_name().upper(): v
+            for u, v in counter.day_counter.items()
+        }
+        athlete_row = self.data["ATHLETE"] == athlete.name
+        for day in week.keys():
+            self.data.loc[athlete_row, day] = week.get(day)
+        s = self.data.loc[athlete_row, week.keys()].sum(axis=1).astype(int)
+        self.data.loc[athlete_row, "TOTAL_DAYS"] = s
 
     def save(self):
         """Save file to csv."""
