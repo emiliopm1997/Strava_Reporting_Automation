@@ -5,7 +5,7 @@ channels:
 dependencies:
   - autopep8=1.6
   - flake8=4.0
-  - flake8-docstings=1.7
+  - flake8-docstrings=1.7
   - gspread=5.7
   - isort=5.9
   - ipykernel=6.15
