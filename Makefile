@@ -9,4 +9,4 @@ rebuild_package:
 
 run:
 	pip install .
-	python -m strava_reporter --test true
+	python -m strava_reporter --n_skip 1 --stop_after 7 --date "2023-05-04"

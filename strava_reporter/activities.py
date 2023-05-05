@@ -34,7 +34,6 @@ class Activities(list):
         last_hashes: List[str],
         stop_after: Optional[int] = None,
         to_ignore: Optional[int] = 0,
-        test: Optional[bool] = False,
     ):
         """
         Retrieve the activities from a club.
@@ -52,8 +51,6 @@ class Activities(list):
         to_ignore: Optional[int]
             Number of activities to ignore, starting from the top. Mainly used
             when analysis is delayed.
-        test : Optional[bool]
-            True for test runs, otherwise False.
         """
         self.clear()
         processed_activities = 0
