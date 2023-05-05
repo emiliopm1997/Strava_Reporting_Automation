@@ -56,8 +56,7 @@ def main(
         ts,
         last_hashes,
         stop_after,
-        n_skip,
-        test
+        n_skip
     )
 
     LOGGER.info("Activities received: {}".format(len(all_activities)))
@@ -69,7 +68,7 @@ def main(
     LOGGER.info("Main process completed succesfully!\n")
 
 
-def analyze(week_number: int):
+def analyze(week_number: int, test: Optional[bool] = False):
     """
     Perform a weekly analysis with activities data.
 
@@ -77,6 +76,8 @@ def analyze(week_number: int):
     ----------
     week_number : int
         The week of interest to perform the analysis.
+    test : Optional[bool]
+        True for test runs, otherwise False.
     """
     LOGGER.info("Analysis starting...")
     weekly_activities = Activities()
@@ -88,7 +89,7 @@ def analyze(week_number: int):
     athletes.assign_activities(weekly_activities)
 
     LOGGER.info("Validating athlete's activities...")
-    athletes.analyze(week_number)
+    athletes.analyze(week_number, test)
     LOGGER.info("Analysis performed correctly!")
 
 
@@ -157,6 +158,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.analysis:
-        analyze(args.analysis)
+        analyze(args.analysis, args.test)
     else:
         main(args.date, args.stop_after, args.n_skip, args.test)

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from .activities import Activities
 from .analysis import WeeklyAnalysis
@@ -95,12 +95,14 @@ class Athletes:
             if athlete:
                 athlete.activities.append(activity)
 
-    def analyze(self, week_number: int):
+    def analyze(self, week_number: int, test: Optional[bool] = False):
         """
         Analyze the daily activities and save the data on a csv.
 
         week_number : int
-            The week number of the analysis
+            The week number of the analysis.
+        test : Optional[bool]
+            True for test runs, otherwise False.
         """
         week_data = Week(**self._db.get_week_information(week_number))
         analysis = WeeklyAnalysis(self.athlete_names, week_data)
@@ -110,4 +112,7 @@ class Athletes:
             athlete = self.get_athlete(athlete_name)
             analysis.count_athlete_activities(athlete)
 
-        analysis.save()
+        if not test:
+            analysis.save()
+        else:
+            print(analysis.data)
